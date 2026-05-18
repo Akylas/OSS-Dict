@@ -194,4 +194,16 @@
     <string name="msg_permission_denied_notifications">Permission to post notifications was denied. The app won\'t be able to notify you about new dictionaries.</string>
     <string name="rationale_notifications_needed">The app needs permission to post notifications so it can inform you when automatic folder loading finds new dictionaries.</string>
     <string name="action_allow">Allow</string>
+
+    <!-- Settings section headers -->
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_section_library">Library</string>
+    <string name="settings_section_content">Content</string>
+    <string name="settings_section_article_view">Article View</string>
+    <string name="settings_section_lookup">Lookup</string>
+    <string name="settings_section_features">Features</string>
+
+    <!-- About section -->
+    <string name="setting_about_source">Source Code</string>
+    <string name="setting_about_sponsor">Support on GitHub Sponsors</string>
 </resources>
