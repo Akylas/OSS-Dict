@@ -228,7 +228,7 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
                     @Override public boolean get() {
                         return WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING);
                     }
-                    @Override public void set(boolean v) { /* read-only */ }
+                    @Override public void set(boolean v) { throw new UnsupportedOperationException(); }
                 }));
         list.add(new SwitchItem(ID_DISABLE_TAB_LABELS, R.string.setting_disable_bottom_nav_labels,
                 new BoolPref() {
@@ -247,7 +247,7 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
                 },
                 new BoolPref() {
                     @Override public boolean get() { return !AppPrefs.getAutoLoadDictFolderUri().isEmpty(); }
-                    @Override public void set(boolean v) { /* read-only check */ }
+                    @Override public void set(boolean v) { throw new UnsupportedOperationException(); }
                 }));
 
         // --- Content ---
