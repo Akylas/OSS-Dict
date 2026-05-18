@@ -28,16 +28,16 @@ def getGitRepoUrl = {
 }
 
 def getGitSponsorsUrl = {
-    try {
-        def repoUrl = getGitRepoUrl()
-        def matcher = repoUrl =~ /https:\/\/github\.com\/([^\/]+)\/.*/
-        if (matcher.matches()) {
-            return "https://github.com/sponsors/${matcher[0][1]}"
-        }
-        return 'https://github.com/sponsors/Akylas'
-    } catch (Exception e) {
-        return 'https://github.com/sponsors/Akylas'
-    }
+//    try {
+//        def repoUrl = getGitRepoUrl()
+//        def matcher = repoUrl =~ /https:\/\/github\.com\/([^\/]+)\/.*/
+//        if (matcher.matches()) {
+//            return "https://github.com/sponsors/${matcher[0][1]}"
+//        }
+//        return 'https://github.com/sponsors/farfromrefug'
+//    } catch (Exception e) {
+        return 'https://github.com/sponsors/farfromrefug'
+//    }
 }
 
 android {
