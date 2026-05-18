@@ -35,6 +35,7 @@ import itkach.aard2.dictionary.Dictionary;
 import itkach.aard2.dictionary.DictionaryContent;
 import itkach.aard2.dictionary.DictionaryEntry;
 import itkach.aard2.dictionary.SlobDictionary;
+import itkach.aard2.dictionary.mdict.MDictDictionary;
 import itkach.slob.Slob;
 
 // With this server, we serve resources with authentication.
@@ -203,6 +204,9 @@ public class SlobServer extends Thread {
         Dictionary dict = slobHelper.getDictionary(dictIdOrUri);
         if (dict != null) {
             String blobId = uri.getQueryParameter("blob");
+            if (blobId == null && (dict instanceof MDictDictionary && !key.toString().startsWith("entry://"))) {
+                blobId = key.toString();
+            }
             if (blobId != null) {
                 DictionaryContent content = dict.getContent(blobId);
                 if (content != null) {
