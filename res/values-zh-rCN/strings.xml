@@ -20,9 +20,9 @@
     <string name="setting_clear_cache">清除缓存</string>
     <string name="setting_clear_cache_subtitle">删除缓存内容，包括远程图片</string>
     <string name="confirm_clear_cached_content">清除缓存内容？</string>
-    <string name="article_collection_nothing_found">未找到</string>
+    <string name="article_collection_nothing_found">没有找到</string>
     <string name="article_collection_selected_not_available">所选条目不可用</string>
-    <string name="article_view_msg_not_found">未找到</string>
+    <string name="article_view_msg_not_found">无结果</string>
     <string name="dictionaries_please_wait">请稍等</string>
     <string name="dictionaries_confirm_forget">忘记%1$s？</string>
     <string name="lookup_nothing_found">什么也没有找到</string>
@@ -81,4 +81,26 @@
     <string name="setting_about">关于%1$s</string>
     <string name="action_lookup">查找</string>
     <string name="select_style">选择样式</string>
+    <string name="action_find_dictionaries">查找词典</string>
+    <string name="action_sort_by_time">按时间排序</string>
+    <string name="action_sort_by_title">按标题排序</string>
+    <string name="setting_remote_content">加载远程内容</string>
+    <plurals name="dict_item_count">
+        <item quantity="other">%,d 个项目</item>
+    </plurals>
+    <string name="action_ascending">由低到高</string>
+    <string name="action_descending">由高到低</string>
+    <string name="formats_supported_header">支持的文件格式：.slob, .mdx, .zip(Stardict, GoldenDict)</string>
+    <string name="here">这里</string>
+    <string name="main_empty_dictionaries_details"><![CDATA[
+        <b>没有打开的词典</b><br/><br/>
+        <small>
+        OSS-Dict支持的文件格式： <b>.slob</b> (Aard/slob), <b>.mdx</b> (MDict), <b>StarDict</b> as <b>.zip</b> archives containing .ifo/.dict/.idx.<br/><br/>
+        您可以从这个wiki页面下载可用的词典： <a href="https://github.com/itkach/slob/wiki/Dictionaries">Dictionaries (slob repo)</a> 或从OSS-Dict的发布页面和社区仓库。
+        </small>
+        ]]></string>
+    <string name="main_empty_dictionaries_title">没有打开的词典</string>
+    <string name="main_empty_dictionaries_subtitle">OSS-Dict支持的文件格式</string>
+    <string name="dictionaries_scanning_device">从设备扫描词典…</string>
+    <string name="article_collection_nothing_to_lookup">什么也没有查到</string>
 </resources>
