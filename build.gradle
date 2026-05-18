@@ -10,6 +10,36 @@ repositories {
     }
 }
 
+def getGitRepoUrl = {
+    try {
+        def proc = ['git', 'remote', 'get-url', 'origin'].execute()
+        proc.waitFor()
+        def url = proc.text.trim()
+        if (url.startsWith('git@github.com:')) {
+            url = 'https://github.com/' + url.substring('git@github.com:'.length())
+        }
+        if (url.endsWith('.git')) {
+            url = url.substring(0, url.length() - 4)
+        }
+        return url
+    } catch (Exception e) {
+        return 'https://github.com/Akylas/OSS-Dict'
+    }
+}
+
+def getGitSponsorsUrl = {
+//    try {
+//        def repoUrl = getGitRepoUrl()
+//        def matcher = repoUrl =~ /https:\/\/github\.com\/([^\/]+)\/.*/
+//        if (matcher.matches()) {
+//            return "https://github.com/sponsors/${matcher[0][1]}"
+//        }
+//        return 'https://github.com/sponsors/farfromrefug'
+//    } catch (Exception e) {
+        return 'https://github.com/sponsors/farfromrefug'
+//    }
+}
+
 android {
     compileSdkVersion 36
 
@@ -25,6 +55,8 @@ android {
         targetSdk 36
         versionCode 74
         versionName "2.0.1"
+        buildConfigField "String", "REPO_URL", "\"${getGitRepoUrl()}\""
+        buildConfigField "String", "SPONSORS_URL", "\"${getGitSponsorsUrl()}\""
     }
 
 
