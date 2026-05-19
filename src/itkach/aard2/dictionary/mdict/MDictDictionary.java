@@ -546,7 +546,7 @@ public final class MDictDictionary implements Dictionary {
             if (enc.isEmpty()) enc = "UTF-8";
             Charset cs;
             try { cs = Charset.forName(enc); } catch (Exception e) { cs = StandardCharsets.UTF_8; }
-            String html = new String(data, 0, len, cs);
+            String html = new String(data, 0, len, cs).replaceAll("entry://", "").replaceAll("sound://", "");
             return new DictionaryContent("text/html; charset=utf-8",
                     ByteBuffer.wrap(html.getBytes(StandardCharsets.UTF_8)));
         } catch (NumberFormatException e) {
