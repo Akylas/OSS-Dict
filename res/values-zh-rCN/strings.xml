@@ -20,9 +20,9 @@
     <string name="setting_clear_cache">清除缓存</string>
     <string name="setting_clear_cache_subtitle">删除缓存内容，包括远程图片</string>
     <string name="confirm_clear_cached_content">清除缓存内容？</string>
-    <string name="article_collection_nothing_found">未找到</string>
+    <string name="article_collection_nothing_found">没有找到</string>
     <string name="article_collection_selected_not_available">所选条目不可用</string>
-    <string name="article_view_msg_not_found">未找到</string>
+    <string name="article_view_msg_not_found">无结果</string>
     <string name="dictionaries_please_wait">请稍等</string>
     <string name="dictionaries_confirm_forget">忘记%1$s？</string>
     <string name="lookup_nothing_found">什么也没有找到</string>
@@ -81,4 +81,64 @@
     <string name="setting_about">关于%1$s</string>
     <string name="action_lookup">查找</string>
     <string name="select_style">选择样式</string>
+    <string name="action_find_dictionaries">查找词典</string>
+    <string name="action_sort_by_time">按时间排序</string>
+    <string name="action_sort_by_title">按标题排序</string>
+    <string name="setting_remote_content">加载远程内容</string>
+    <plurals name="dict_item_count">
+        <item quantity="other">%,d 个项目</item>
+    </plurals>
+    <string name="action_ascending">由低到高</string>
+    <string name="action_descending">由高到低</string>
+    <string name="formats_supported_header">支持的文件格式：.slob, .mdx, .zip(Stardict, GoldenDict)</string>
+    <string name="here">这里</string>
+    <string name="main_empty_dictionaries_details"><![CDATA[
+        <b>没有打开的词典</b><br/><br/>
+        <small>
+        OSS-Dict支持的文件格式： <b>.slob</b> (Aard/slob), <b>.mdx</b> (MDict), <b>StarDict</b> as <b>.zip</b> archives containing .ifo/.dict/.idx.<br/><br/>
+        您可以从这个wiki页面下载成品词典： <a href="https://github.com/itkach/slob/wiki/Dictionaries">Dictionaries (slob repo)</a> 或从OSS-Dict的发布页面和社区仓库。
+        </small>
+        ]]></string>
+    <string name="main_empty_dictionaries_title">没有打开的词典</string>
+    <string name="main_empty_dictionaries_subtitle">OSS-Dict支持的文件格式</string>
+    <string name="dictionaries_scanning_device">从设备扫描词典…</string>
+    <string name="article_collection_nothing_to_lookup">什么也没有查到</string>
+    <string name="main_empty_dictionaries_download_text">你可以找到词典链接</string>
+    <string name="action_select_dictionary_folder">选择词典文件夹</string>
+    <string name="msg_no_activity_to_select_folder">没有选择文件夹的应用</string>
+    <string name="setting_auto_load_folder">词典库文件夹</string>
+    <string name="setting_auto_load_folder_subtitle">自动从所选文件夹加载词典</string>
+    <string name="setting_auto_move_to_folder">自动移动到文件夹</string>
+    <string name="setting_auto_move_to_folder_subtitle_disabled">先设置词典库文件夹</string>
+    <string name="action_clear">清除</string>
+    <string name="msg_folder_selected">成功选中了文件夹</string>
+    <string name="msg_failed_to_select_folder">未能选中文件夹</string>
+    <string name="msg_folder_cleared">清除了词典库文件夹</string>
+    <string name="msg_move_to_auto_load_folder_hint">小提示：将词典文件移动到词典库文件夹进行自动管理</string>
+    <string name="dialog_clear_auto_load_folder_title">清除词典库文件夹？</string>
+    <string name="dialog_clear_auto_load_folder_message">所有从此文件夹加载的词典将从应用被删除。此操作无法撤销。</string>
+    <string name="notification_channel_dictionary_scan">词典扫描</string>
+    <string name="notification_channel_dictionary_scan_desc">扫描词典库文件夹时显示进度</string>
+    <string name="notification_scanning_dictionaries">正在扫描词典</string>
+    <string name="notification_scanning_starting">正在启动扫描…</string>
+    <string name="settings_section_article_view">文章视图</string>
+    <string name="permission_internet_required_message">本应用正常工作需联网权限。虽然应用不直接使用互联网，但需要这个权限用于内部套接字通信。请在设备设置中启用联网权限。</string>
+    <string name="msg_permission_denied_notifications">推送通知权限被拒绝。应用无法通知新词典。</string>
+    <string name="rationale_notifications_needed">本应用需要推送通知权限以便在自动文件夹加载找到新词典时进行通知。</string>
+    <string name="action_allow">允许</string>
+    <string name="notification_loading_dictionary">正在加载 %1$s（%2$d/%3$d）</string>
+    <string name="notification_scan_completed_both">添加了 %1$d 部词典，删除了 %2$d 部词典</string>
+    <string name="notification_scan_completed_no_changes">未检测到更改</string>
+    <plurals name="notification_scan_completed_added">
+        <item quantity="other">添加了 %d 部词典</item>
+    </plurals>
+    <plurals name="notification_scan_completed_removed">
+        <item quantity="other">删除了 %d 部词典</item>
+    </plurals>
+    <string name="msg_loading_dictionary">正在加载词典…</string>
+    <string name="setting_disable_bottom_nav_labels">禁用底部导航标签</string>
+    <string name="setting_remote_content_cache_first">仅在未缓存时加载远程内容</string>
+    <string name="setting_sort_lookup_by_rank">按匹配度从高到低排列结果</string>
+    <string name="permission_internet_required_title">需要联网权限</string>
+    <string name="setting_about_sponsor">在 GitHub Sponsors 上支持</string>
 </resources>
