@@ -141,4 +141,10 @@
     <string name="setting_sort_lookup_by_rank">按匹配度从高到低排列结果</string>
     <string name="permission_internet_required_title">需要联网权限</string>
     <string name="setting_about_sponsor">在 GitHub Sponsors 上支持</string>
+    <string name="settings_section_appearance">外观</string>
+    <string name="settings_section_library">词典库</string>
+    <string name="settings_section_content">内容</string>
+    <string name="settings_section_lookup">查询</string>
+    <string name="settings_section_features">功能</string>
+    <string name="setting_about_source">源代码</string>
 </resources>
