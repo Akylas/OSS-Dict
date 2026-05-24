@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="subtitle_lookup">Opzoeken</string>
+    <string name="subtitle_lookup">Zoeken</string>
     <string name="subtitle_bookmark">Bladwijzers</string>
     <string name="subtitle_history">Geschiedenis</string>
     <string name="subtitle_dictionaries">Woordenboeken</string>
@@ -108,8 +108,48 @@
     <string name="main_empty_dictionaries_details"><![CDATA[
         <b>Geen geopende woordenboeken</b><br/><br/>
         <small>
-        OSS-Dict ondersteunt de volgende bestanden: <b>.slob</b> (Aard/slob), <b>.mdx</b> (MDict), <b>StarDict</b> as <b>.zip</b> archieven met .ifo/.dict/.idx.<br/><br/>
-        Je kunt kant-en-klare woordenboeken downloaden van de projectwiki.: <a href="https://github.com/itkach/slob/wiki/Dictionaries">Woordenboeken (slob repo)</a> of via de OSS‑Dict-publicaties en gemeenschapsarchieven.
+        OSS-Dict ondersteunt de volgende bestanden: <b>.slob</b> (Aard/slob), <b>.mdx</b> (MDict), <b>StarDict</b> als <b>.zip</b> archieven met .ifo/.dict/.idx.<br/><br/>
+        Je kunt kant-en-klare woordenboeken downloaden van de projectwiki: <a href="https://github.com/itkach/slob/wiki/Dictionaries">Woordenboeken (slob repo)</a> of via de OSS‑Dict-publicaties en gemeenschapsarchieven.
         </small>
         ]]></string>
+    <string name="action_select_dictionary_folder">Woordenboekmap selecteren</string>
+    <string name="msg_no_activity_to_select_folder">Geen app beschikbaar om map te selecteren</string>
+    <string name="setting_auto_load_folder">Bibliotheekmap</string>
+    <string name="setting_auto_load_folder_subtitle">Woordenboeken automatisch laden uit een geselecteerde map</string>
+    <string name="setting_auto_move_to_folder">Automatisch verplaatsen naar map</string>
+    <string name="setting_auto_move_to_folder_subtitle_disabled">Stel eerst een bibliotheekmap in</string>
+    <string name="action_clear">Wissen</string>
+    <string name="msg_folder_selected">Map succesvol geselecteerd</string>
+    <string name="msg_failed_to_select_folder">Map selecteren mislukt</string>
+    <string name="msg_folder_cleared">Bibliotheekmap gewist</string>
+    <string name="msg_move_to_auto_load_folder_hint">Tip: verplaats woordenboekbestanden naar je bibliotheekmap voor automatisch beheer</string>
+    <string name="dialog_clear_auto_load_folder_title">Bibliotheekmap wissen?</string>
+    <string name="dialog_clear_auto_load_folder_message">Alle woordenboeken die uit deze map zijn geladen, worden uit de app verwijderd. Deze actie kan niet ongedaan worden gemaakt.</string>
+    <string name="notification_channel_dictionary_scan">Woordenboek zoeken</string>
+    <string name="notification_channel_dictionary_scan_desc">Toont voortgang bij het scannen van de woordenboekmap</string>
+    <string name="notification_scanning_dictionaries">Zoeken naar woordenboeken</string>
+    <string name="notification_scanning_starting">Zoeken starten…</string>
+    <string name="notification_loading_dictionary">%1$s (%2$d/%3$d) laden</string>
+    <string name="notification_scan_completed_both">%1$d woordenboeken toegevoegd, %2$d verwijderd</string>
+    <string name="notification_scan_completed_no_changes">Geen wijzigingen gedetecteerd</string>
+    <plurals name="notification_scan_completed_added">
+        <item quantity="one">%d woordenboek toegevoegd</item>
+        <item quantity="other">%d woordenboeken toegevoegd</item>
+    </plurals>
+    <plurals name="notification_scan_completed_removed">
+        <item quantity="one">%d woordenboek verwijderd</item>
+        <item quantity="other">%d woordenboeken verwijderd</item>
+    </plurals>
+    <string name="setting_sort_lookup_by_rank">Resultaten sorteren op meest relevant</string>
+    <string name="msg_permission_denied_notifications">Toestemming voor het tonen van meldingen geweigerd. De app kan je geen meldingen sturen over nieuwe woordenboeken.</string>
+    <string name="rationale_notifications_needed">De app heeft toestemming nodig om meldingen te tonen, zodat deze je kan informeren wanneer het automatisch laden van mappen nieuwe woordenboeken vindt.</string>
+    <string name="action_allow">Toestaan</string>
+    <string name="settings_section_appearance">Weergave</string>
+    <string name="settings_section_library">Bibliotheek</string>
+    <string name="settings_section_content">Inhoud</string>
+    <string name="settings_section_article_view">Artikelweergave</string>
+    <string name="settings_section_lookup">Opzoeken</string>
+    <string name="settings_section_features">Opties</string>
+    <string name="setting_about_source">Broncode</string>
+    <string name="setting_about_sponsor">Steun op GitHub Sponsors</string>
 </resources>
