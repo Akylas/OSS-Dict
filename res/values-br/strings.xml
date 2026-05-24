@@ -1,3 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="subtitle_lookup">Klask</string>
+    <string name="subtitle_bookmark">Sinedoù</string>
+    <string name="subtitle_history">Roll-istor</string>
+    <string name="subtitle_dictionaries">Geriadurioù</string>
+    <string name="action_find_dictionaries">Klask geriadurioù</string>
+    <string name="action_find_in_page">Klask er bajenn</string>
+    <string name="action_bookmark_article">Sined</string>
+    <string name="action_filter">Sil</string>
 </resources>
