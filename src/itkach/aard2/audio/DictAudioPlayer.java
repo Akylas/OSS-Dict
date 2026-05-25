@@ -171,7 +171,7 @@ public class DictAudioPlayer {
     private void releaseMp() {
         MediaPlayer mp = mediaPlayer;
         if (mp != null) {
-            try { mp.stop(); } catch (Exception ignored) {}
+            try { mp.stop(); } catch (IllegalStateException ignored) {}
             mp.release();
             mediaPlayer = null;
         }
@@ -180,7 +180,7 @@ public class DictAudioPlayer {
     private void releaseAt() {
         AudioTrack at = audioTrack;
         if (at != null) {
-            try { at.stop(); } catch (Exception ignored) {}
+            try { at.stop(); } catch (IllegalStateException ignored) {}
             at.release();
             audioTrack = null;
         }

@@ -1,5 +1,7 @@
 package itkach.aard2.audio;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import org.xiph.speex.SpeexDecoder;
@@ -20,6 +22,8 @@ import java.util.List;
  * packets using the pure-Java jspeex {@link SpeexDecoder}.</p>
  */
 public class OggSpeexDecoder {
+
+    private static final String TAG = OggSpeexDecoder.class.getSimpleName();
 
     private final byte[] buf;
     private int pos;
@@ -95,8 +99,10 @@ public class OggSpeexDecoder {
                     decoder.getProcessedData(pcm, 0);
                     pcmChunks.add(pcm);
                     totalSamples += pcm.length;
-                } catch (Exception ignored) {
-                    // Skip corrupted frames rather than aborting the whole clip
+                } catch (StreamCorruptedException e) {
+                    Log.w(TAG, "Skipping corrupted Speex frame at packet " + i + " frame " + f, e);
+                } catch (RuntimeException e) {
+                    Log.w(TAG, "Speex decoder error at packet " + i + " frame " + f, e);
                 }
             }
         }
