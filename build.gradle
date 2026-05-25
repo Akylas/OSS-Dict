@@ -134,6 +134,8 @@ android {
 dependencies {
     api project(':slobj')
 
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
     implementation "com.google.android.material:material:1.13.0"
     implementation "androidx.appcompat:appcompat:1.7.1"
 
@@ -147,6 +149,8 @@ dependencies {
         }
     }
     implementation "androidx.webkit:webkit:1.15.0"
+
+    implementation 'com.github.SourceUtils:jspeex:b7f6f864f0'
 
     api 'com.fasterxml.jackson.core:jackson-databind:2.21.2'
     api 'com.fasterxml.jackson.core:jackson-core:2.21.2'
