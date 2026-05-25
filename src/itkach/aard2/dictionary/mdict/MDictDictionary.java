@@ -550,9 +550,9 @@ public final class MDictDictionary implements Dictionary {
                     .replaceAll("entry://", "")
                     .replaceAll("bword://", "")
                     .replaceAll("href=\"sound://",
-                            "onclick=\"$SLOB.playAudio(this.href); return false;\" href=\"")
+                            "onclick=\"\\$SLOB.playAudio(this.href); return false;\" href=\"")
                     .replaceAll("href='sound://",
-                            "onclick=\"$SLOB.playAudio(this.href); return false;\" href='")
+                            "onclick=\"\\$SLOB.playAudio(this.href); return false;\" href='")
                     .replaceAll("<img src=\"/", "<img src=\"")
                     .replaceAll("<img src='/", "<img src='")
                     .replaceAll("<img src='file:///", "<img src='")
