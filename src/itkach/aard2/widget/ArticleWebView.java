@@ -44,6 +44,7 @@ import java.util.TreeSet;
 import itkach.aard2.R;
 import itkach.aard2.SlobHelper;
 import itkach.aard2.article.ArticleCollectionActivity;
+import itkach.aard2.audio.DictAudioPlayer;
 import itkach.aard2.descriptor.BlobDescriptor;
 import itkach.aard2.prefs.ArticleViewPrefs;
 import itkach.aard2.prefs.UserStylesPrefs;
@@ -81,6 +82,7 @@ public class ArticleWebView extends SearchableWebView {
     private final ConnectivityManager connectivityManager;
     private final Timer timer;
     private final TimerTask applyStylePref;
+    private final DictAudioPlayer audioPlayer = new DictAudioPlayer();
 
     private boolean forceLoadRemoteContent;
 
@@ -296,6 +298,20 @@ public class ArticleWebView extends SearchableWebView {
         applyStylePref.cancel();
     }
 
+    /**
+     * Called from JavaScript (via the {@code $SLOB} interface) to play an audio
+     * resource fetched from the SlobServer.  Handles both standard formats
+     * (MP3, OGG Vorbis, WAV…) and Ogg-Speex ({@code .spx}).
+     *
+     * @param url absolute URL of the audio resource (localhost SlobServer URL)
+     */
+    @JavascriptInterface
+    public void playAudio(String url) {
+        if (url != null && !url.isEmpty()) {
+            audioPlayer.play(url);
+        }
+    }
+
     public void applyStylePref() {
         String styleTitle = getPreferredStyle();
         setStyle(styleTitle);
@@ -394,6 +410,7 @@ public class ArticleWebView extends SearchableWebView {
     public void destroy() {
         super.destroy();
         timer.cancel();
+        audioPlayer.release();
     }
 
     public class WebViewClient extends WebViewClientCompat {

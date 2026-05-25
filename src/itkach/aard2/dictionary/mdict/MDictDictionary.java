@@ -550,9 +550,9 @@ public final class MDictDictionary implements Dictionary {
                     .replaceAll("entry://", "")
                     .replaceAll("bword://", "")
                     .replaceAll("href=\"sound://",
-                            "onclick=\"new Audio(this.href).play(); return false;\" href=\"")
+                            "onclick=\"$SLOB.playAudio(this.href); return false;\" href=\"")
                     .replaceAll("href='sound://",
-                            "onclick=\"new Audio(this.href).play(); return false;\" href='")
+                            "onclick=\"$SLOB.playAudio(this.href); return false;\" href='")
                     .replaceAll("<img src=\"/", "<img src=\"")
                     .replaceAll("<img src='/", "<img src='")
                     .replaceAll("<img src='file:///", "<img src='")
@@ -1307,6 +1307,7 @@ public final class MDictDictionary implements Dictionary {
         if (lower.endsWith(".mp3"))  return "audio/mpeg";
         if (lower.endsWith(".ogg"))  return "audio/ogg";
         if (lower.endsWith(".wav"))  return "audio/wav";
+        if (lower.endsWith(".spx"))  return "audio/x-speex+ogg";
         return "application/octet-stream";
     }
 }

@@ -134,6 +134,8 @@ android {
 dependencies {
     api project(':slobj')
 
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
     implementation "com.google.android.material:material:1.13.0"
     implementation "androidx.appcompat:appcompat:1.7.1"
 
