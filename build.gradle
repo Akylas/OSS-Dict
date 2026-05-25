@@ -115,6 +115,7 @@ android {
             if (System.getenv("KEYSTORE") != null) {
                 signingConfig signingConfigs.release
             }
+            proguardFiles("proguard-rules.pro")
         }
     }
     buildFeatures {
