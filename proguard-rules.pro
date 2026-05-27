@@ -1,0 +1,6 @@
+-dontwarn javax.sound.sampled.AudioFileFormat$Type
+-dontwarn javax.sound.sampled.AudioFormat$Encoding
+-dontwarn javax.sound.sampled.AudioFormat
+-dontwarn javax.sound.sampled.spi.AudioFileReader
+-dontwarn javax.sound.sampled.spi.AudioFileWriter
+-dontwarn javax.sound.sampled.spi.FormatConversionProvider
