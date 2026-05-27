@@ -145,6 +145,12 @@ jobs:
           mkdir -p "$(dirname "$KEYSTORE_PATH")"
           echo $KEYSTORE_BASE64 | base64 -d > $KEYSTORE_PATH
 
+      - name: publish github
+        run: |
+          bundle exec fastlane android github create_tag:${{ github.event.inputs.publish }} publish:${{ github.event.inputs.publish }} github:true --verbose
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            
       - name: publish beta
         if: github.event.inputs.publish == 'true'
         run: |
@@ -154,12 +160,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: publish github
-        run: |
-          bundle exec fastlane android github create_tag:${{ github.event.inputs.publish }} publish:${{ github.event.inputs.publish }} github:true --verbose
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            
       - uses: actions/upload-artifact@v4
         with:
           name:  ${{ env.APP_ID }}.${{ env.VERSION_STR }}
