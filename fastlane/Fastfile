@@ -137,7 +137,7 @@ lane :build_flavor do |params|
 
   if (options[:publish] != false)
     if (platform == 'android')
-      write_changelog(version:versionCode, changelog: flavor != 'github' ? changelog : get_changelog(platform:platform, flavor:'store'));
+      write_changelog(version:versionCode, changelog: flavor != 'github' ? changelog : get_changelog(platform:platform, flavor:'store', commit_url:commit_url));
     end
     case flavor
     when 'appcenter'
@@ -240,26 +240,27 @@ platform :android do
     version = params[:version]
     changelog = params[:changelog]
 
-    if (changelog && changelog.length > 500) 
-      changelog = changelog[0..499]
-    end
-
-    metadata_dir=File.join(metadata_path_realpath,"android")
-    puts "current dir: #{Dir.getwd}"
-    puts "metadata_dir: #{metadata_dir}"
-    system 'mkdir', '-p', metadata_dir
-    files = []
-    metadata_languages.each { |lang| 
-      changelogFolderPath = File.join(metadata_dir, lang, "changelogs")
-      puts "changelogFolderPath: #{changelogFolderPath}"
-      changelogFilePath = File.join(changelogFolderPath, "#{version}.txt")
-      writeFileIfNotExist(changelogFilePath, changelog)
-      files.push(changelogFilePath)
-    }
-    # Create a new branch and upload a PR for it.
-    if (files.length > 0)
-      git_add(path: files)
-      git_commit(path: files, message: "#{version} release notes", allow_nothing_to_commit: true)
+    if (changelog) 
+      if (changelog.length > 500) 
+        changelog = changelog[0..499]
+      end
+      metadata_dir=File.join(metadata_path_realpath,"android")
+      puts "current dir: #{Dir.getwd}"
+      puts "metadata_dir: #{metadata_dir}"
+      system 'mkdir', '-p', metadata_dir
+      files = []
+      metadata_languages.each { |lang| 
+        changelogFolderPath = File.join(metadata_dir, lang, "changelogs")
+        puts "changelogFolderPath: #{changelogFolderPath}"
+        changelogFilePath = File.join(changelogFolderPath, "#{version}.txt")
+        writeFileIfNotExist(changelogFilePath, changelog)
+        files.push(changelogFilePath)
+      }
+      # Create a new branch and upload a PR for it.
+      if (files.length > 0)
+        git_add(path: files)
+        git_commit(path: files, message: "#{version} release notes", allow_nothing_to_commit: true)
+      end
     end
     # sh("git add #{metadata_dir}; git commit -m '#{version} release notes' --allow-empty")
   end
