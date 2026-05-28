@@ -45,8 +45,8 @@ android {
         applicationId "com.akylas.aard2"
         minSdk 24
         targetSdk 36
-        versionCode 76
-        versionName "2.0.3"
+        versionCode 77
+        versionName "2.0.4"
         buildConfigField "String", "REPO_URL", "\"${getGitRepoUrl()}\""
         buildConfigField "String", "SPONSORS_URL", "\"${getGitSponsorsUrl()}\""
     }
