@@ -250,11 +250,13 @@ platform :android do
       system 'mkdir', '-p', metadata_dir
       files = []
       metadata_languages.each { |lang| 
-        changelogFolderPath = File.join(metadata_dir, lang, "changelogs")
-        puts "changelogFolderPath: #{changelogFolderPath}"
-        changelogFilePath = File.join(changelogFolderPath, "#{version}.txt")
-        writeFileIfNotExist(changelogFilePath, changelog)
-        files.push(changelogFilePath)
+        if (Dir.exist?( File.join(metadata_dir, lang)))
+          changelogFolderPath = File.join(metadata_dir, lang, "changelogs")
+          puts "changelogFolderPath: #{changelogFolderPath}"
+          changelogFilePath = File.join(changelogFolderPath, "#{version}.txt")
+          writeFileIfNotExist(changelogFilePath, changelog)
+          files.push(changelogFilePath)
+        end
       }
       # Create a new branch and upload a PR for it.
       if (files.length > 0)
