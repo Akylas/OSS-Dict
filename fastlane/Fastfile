@@ -290,6 +290,7 @@ platform :android do
       metadata_path:File.join(metadata_path_realpath, "android"),
       track_promote_to: track,
       aab: lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH],
+      skip_upload_apk: true,
       skip_upload_screenshots: !options[:upload_screenshots],
       skip_upload_images: !options[:upload_images],
       skip_upload_metadata: !options[:upload_metadata]
