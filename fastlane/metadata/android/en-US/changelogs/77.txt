@@ -1,0 +1,3 @@
+Bug fixes:
+- broken production build
+- reduce(drastically) APK size by using android provided icu library
