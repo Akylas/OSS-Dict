@@ -109,6 +109,13 @@ android {
     }
 
     buildTypes {
+        // uncommment this if you want to test proguard in debug
+//        debug {
+//            minifyEnabled true
+//            shrinkResources true
+//            proguardFiles("proguard-rules.pro")
+//            zipAlignEnabled true
+//        }
         release {
             minifyEnabled true
             shrinkResources true
