@@ -12,8 +12,8 @@ def truncate(string, length = 20)
 end
 def writeFileIfNotExist(filePath, string)
   if !File.exist?(filePath) 
-    if (Dir.exist?(File.basename(filePath)) == false)
-      FileUtils.mkdir File.basename(filePath)
+    if (Dir.exist?(File.dirname(filePath)) == false)
+      FileUtils.mkdir File.dirname(filePath)
     end
     File.write(filePath, string)
   end
