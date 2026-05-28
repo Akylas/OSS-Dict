@@ -9,9 +9,9 @@ import android.util.Log;
 import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
 
-import com.ibm.icu.text.Collator;
-import com.ibm.icu.text.RuleBasedCollator;
-import com.ibm.icu.text.StringSearch;
+import android.icu.text.Collator;
+import android.icu.text.RuleBasedCollator;
+import android.icu.text.StringSearch;
 
 import java.text.StringCharacterIterator;
 import java.util.AbstractList;

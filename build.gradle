@@ -2,14 +2,6 @@ plugins {
     id 'com.android.application' version '8.13.2'
 }
 
-repositories {
-    mavenCentral()
-    google()
-    maven {
-        url "https://jitpack.io"
-    }
-}
-
 def getGitRepoUrl = {
     try {
         def proc = ['git', 'remote', 'get-url', 'origin'].execute()
@@ -51,7 +43,7 @@ android {
     defaultConfig {
         namespace "itkach.aard2"
         applicationId "com.akylas.aard2"
-        minSdk 21
+        minSdk 24
         targetSdk 36
         versionCode 76
         versionName "2.0.3"
