@@ -1,25 +1,25 @@
-# Proguard configuration for Jackson 2.x
--keep @com.fasterxml.jackson.annotation.JsonIgnoreProperties class * { *; }
--keep class com.fasterxml.** { *; }
--keep class org.codehaus.** { *; }
--keepnames class com.fasterxml.jackson.** { *; }
--keepclassmembers public final enum com.fasterxml.jackson.annotation.JsonAutoDetect$Visibility {
-    public static final com.fasterxml.jackson.annotation.JsonAutoDetect$Visibility *;
+# Jackson core
+-keep class com.fasterxml.jackson.** { *; }
+-dontwarn com.fasterxml.jackson.**
+
+# Keep model classes used for serialization
+-keep class itkach.aard2.** { *; }
+
+# Keep enum methods
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
 }
 
-# General
--keepattributes SourceFile,LineNumberTable,*Annotation*,EnclosingMethod,Signature,Exceptions,InnerClasses
--dontwarn java.beans.ConstructorProperties
--dontwarn java.beans.Transient
+# Keep annotations/signatures
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
+
+# Keep constructors
+-keepclassmembers class * {
+    public <init>();
+}
 
 -keepclassmembers class * {
     @android.webkit.JavascriptInterface <methods>;
 }
 
-# Proguard configuration for Speex
-#-dontwarn javax.sound.sampled.AudioFileFormat$Type
-#-dontwarn javax.sound.sampled.AudioFormat$Encoding
-#-dontwarn javax.sound.sampled.AudioFormat
-#-dontwarn javax.sound.sampled.spi.AudioFileReader
-#-dontwarn javax.sound.sampled.spi.AudioFileWriter
-#-dontwarn javax.sound.sampled.spi.FormatConversionProvider
