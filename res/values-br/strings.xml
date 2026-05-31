@@ -8,4 +8,24 @@
     <string name="action_find_in_page">Klask er bajenn</string>
     <string name="action_bookmark_article">Sined</string>
     <string name="action_filter">Sil</string>
+    <string name="action_ascending">War-greskiñ</string>
+    <string name="action_descending">War-zigreskiñ</string>
+    <string name="action_sort_by_title">Lizherennek</string>
+    <string name="action_sort_by_time">Kronologel</string>
+    <string name="action_lookup">Klask</string>
+    <string name="action_zoom_out">Dizoumañ</string>
+    <string name="action_zoom_in">Zoumañ</string>
+    <string name="action_zoom_reset">Zoum 100%</string>
+    <string name="action_select_style">Stiloù…</string>
+    <string name="select_style">Dibab ur stil</string>
+    <string name="default_style_title">Dre ziouer</string>
+    <string name="subtitle_settings">Arventennoù</string>
+    <string name="setting_remote_content_always">Atav</string>
+    <string name="setting_remote_content_wifi">Gant ar Wi-fi hepken</string>
+    <string name="setting_remote_content_never">Morse</string>
+    <string name="setting_remote_content">Kargañ an endalc\'had a-bell</string>
+    <string name="setting_about">Diwar-benn %1$s</string>
+    <string name="formats_supported_header">Furmadoù degemeret: .slob, .mdx, .zip (Stardict, GoldenDict)</string>
+    <string name="main_empty_dictionaries_title">N\'eus geriadur digor ebet</string>
+    <string name="main_empty_dictionaries_subtitle">OSS-Dict a zegemer ar furmadoù da-heul</string>
 </resources>
