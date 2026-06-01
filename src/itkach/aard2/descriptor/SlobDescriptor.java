@@ -11,6 +11,9 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +26,7 @@ import itkach.aard2.slob.SlobTags;
 import itkach.slob.Slob;
 
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SlobDescriptor extends BaseDescriptor {
     private final static String TAG = SlobDescriptor.class.getSimpleName();
 
@@ -31,6 +35,7 @@ public class SlobDescriptor extends BaseDescriptor {
      * {@code "stardict"}.  Defaults to {@code "slob"} so that existing
      * persisted descriptors continue to work without migration.
      */
+    @JsonProperty("format")
     public String format = FORMAT_SLOB;
 
     public static final String FORMAT_SLOB     = "slob";
@@ -38,17 +43,31 @@ public class SlobDescriptor extends BaseDescriptor {
     public static final String FORMAT_STARDICT = "stardict";
     public static final String FORMAT_STARDICT_ARCHIVE = "stardict-archive";
 
+    @JsonProperty("path")
     public String path;
     /**
      * Optional URI of a companion {@code .mdd} resource file for MDict dictionaries.
      * {@code null} when there is no companion MDD file.
      */
+    @JsonProperty("mddPath")
     public String mddPath;
+
+    @JsonProperty("tags")
     public Map<String, String> tags = new HashMap<>();
+
+    @JsonProperty("active")
     public boolean active = true;
+
+    @JsonProperty("priority")
     public long priority;
+
+    @JsonProperty("blobCount")
     public long blobCount;
+
+    @JsonProperty("error")
     public String error;
+
+    @JsonProperty("expandDetail")
     public boolean expandDetail = false;
     @SuppressWarnings("FieldCanBeLocal")
     private transient ParcelFileDescriptor fileDescriptor;
@@ -105,6 +124,13 @@ public class SlobDescriptor extends BaseDescriptor {
      */
     @Nullable
     public Dictionary loadDictionary(@NonNull Context context) {
+        if (path == null || path.isEmpty()) {
+            Log.e(TAG, "Error opening null (format=" + format + ")");
+            error = "Missing path";
+            expandDetail = true;
+            active = false;
+            return null;
+        }
         try {
             Uri uri = Uri.parse(path);
             Dictionary dict;

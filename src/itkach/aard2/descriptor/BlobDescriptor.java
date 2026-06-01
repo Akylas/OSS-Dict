@@ -5,9 +5,13 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 import java.util.UUID;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BlobDescriptor extends BaseDescriptor {
     @Override
     public int hashCode() {
@@ -47,10 +51,19 @@ public class BlobDescriptor extends BaseDescriptor {
         } else return slobId.equals(other.slobId);
     }
 
+    @JsonProperty("slobId")
     public String slobId;
+
+    @JsonProperty("slobUri")
     public String slobUri;
+
+    @JsonProperty("blobId")
     public String blobId;
+
+    @JsonProperty("key")
     public String key;
+
+    @JsonProperty("fragment")
     public String fragment;
 
     @Nullable

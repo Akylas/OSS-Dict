@@ -111,6 +111,9 @@ public class BlobDescriptorList extends AbstractList<BlobDescriptor> {
             this.filteredList.addAll(this.list);
         } else {
             for (BlobDescriptor bd : this.list) {
+                if (bd == null || TextUtils.isEmpty(bd.key)) {
+                    continue;
+                }
                 StringSearch stringSearch = new StringSearch(
                         filter, new StringCharacterIterator(bd.key), filterCollator);
                 int matchPos = stringSearch.first();
@@ -138,7 +141,13 @@ public class BlobDescriptorList extends AbstractList<BlobDescriptor> {
     }
 
     void load() {
-        this.list.addAll(this.store.load(BlobDescriptor.class));
+        List<BlobDescriptor> loaded = this.store.load(BlobDescriptor.class);
+        for (BlobDescriptor bd : loaded) {
+            if (bd == null || TextUtils.isEmpty(bd.slobId) || TextUtils.isEmpty(bd.key)) {
+                continue;
+            }
+            this.list.add(bd);
+        }
         notifyDataSetChanged();
     }
 
@@ -223,6 +232,9 @@ public class BlobDescriptorList extends AbstractList<BlobDescriptor> {
 
     public BlobDescriptor add(Uri contentUrl) {
         BlobDescriptor bd = createDescriptor(contentUrl);
+        if (bd == null) {
+            return null;
+        }
         int index = this.list.indexOf(bd);
         if (index > -1) {
             return this.list.get(index);
@@ -270,12 +282,15 @@ public class BlobDescriptorList extends AbstractList<BlobDescriptor> {
 
     public boolean contains(Uri contentUrl) {
         BlobDescriptor toFind = createDescriptor(contentUrl);
+        if (toFind == null) {
+            return false;
+        }
         for (BlobDescriptor bd : this.list) {
             if (bd.equals(toFind)) {
                 Log.d(TAG, "Found exact match, bookmarked");
                 return true;
             }
-            if (bd.key.equals(toFind.key) && bd.slobUri.equals(toFind.slobUri)) {
+            if (TextUtils.equals(bd.key, toFind.key) && TextUtils.equals(bd.slobUri, toFind.slobUri)) {
                 Log.d(TAG, "Found approximate match, bookmarked");
                 return true;
             }

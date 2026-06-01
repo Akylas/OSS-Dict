@@ -18,6 +18,9 @@ public class HistoryBlobDescriptorList extends BlobDescriptorList {
     @Override
     public BlobDescriptor add(Uri contentUrl) {
         BlobDescriptor bd = createDescriptor(contentUrl);
+        if (bd == null) {
+            return null;
+        }
         int index = list.indexOf(bd);
         if (index > -1) {
             BlobDescriptor oldBd = list.get(index);

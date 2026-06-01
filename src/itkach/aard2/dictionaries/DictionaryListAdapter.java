@@ -82,11 +82,20 @@ public class DictionaryListAdapter extends RecyclerView.Adapter<DictionaryListAd
         Context context = holder.itemView.getContext();
         String label = desc.getLabel();
         String fileName;
-        Uri uri = Uri.parse(desc.path);
-        DocumentFile documentFile = DocumentFile.fromSingleUri(context, uri);
-        fileName = documentFile != null ? documentFile.getName() : uri.getLastPathSegment();
+        Uri uri = null;
+        if (!TextUtils.isEmpty(desc.path)) {
+            try {
+                uri = Uri.parse(desc.path);
+            } catch (Exception e) {
+                Log.w(TAG, "Invalid dictionary path URI: " + desc.path, e);
+            }
+        }
+        DocumentFile documentFile = uri != null ? DocumentFile.fromSingleUri(context, uri) : null;
+        fileName = documentFile != null
+                ? documentFile.getName()
+                : (uri != null ? uri.getLastPathSegment() : desc.path);
         if (fileName == null) {
-            fileName = desc.path;
+            fileName = "(unknown)";
         }
         long blobCount = desc.blobCount;
         boolean available = this.data.resolve(desc) != null;
