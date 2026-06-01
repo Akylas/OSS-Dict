@@ -1,0 +1,3 @@
+Bug fixes:
+- migration fixes from old builds not support proguard yet. Fixes crashes on startup
+- Translations update
