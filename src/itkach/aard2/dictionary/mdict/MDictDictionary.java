@@ -16,7 +16,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
@@ -68,6 +67,8 @@ public final class MDictDictionary implements Dictionary {
     private static final int CACHE_VERSION = 2;
     /** Buffer size for cache I/O (64 KiB). */
     private static final int CACHE_BUFFER_SIZE = 65536;
+
+    private static final String HEADWORD_LINK_MARKER = "@@@LINK=";
 
     // -----------------------------------------------------------------------
     // Persisted / derived state
@@ -546,7 +547,14 @@ public final class MDictDictionary implements Dictionary {
             if (enc.isEmpty()) enc = "UTF-8";
             Charset cs;
             try { cs = Charset.forName(enc); } catch (Exception e) { cs = StandardCharsets.UTF_8; }
-            String html = new String(data, 0, len, cs)
+            String html = new String(data, 0, len, cs);
+
+            // Handle MDict headword aliases: a record whose body is `@@@LINK=<target>`
+            // "analyse" should redirect to "analyze" instead of displaying "@@@LINK=analyze"
+            if (html.startsWith(HEADWORD_LINK_MARKER)) {
+                html = resolveMDictLink(html, cs);
+            }
+            html = html
                     .replaceAll("entry://", "")
                     .replaceAll("bword://", "")
                     .replaceAll("href=\"sound://",
@@ -566,6 +574,22 @@ public final class MDictDictionary implements Dictionary {
             }
             return null;
         }
+    }
+
+    private String resolveMDictLink(String html, Charset charset) {
+        String linkTarget = html.trim().substring(HEADWORD_LINK_MARKER.length());
+
+        int targetIdx = findStartIndex(linkTarget, Slob.Strength.QUATERNARY);
+        if (targetIdx >= 0 && targetIdx < keys.size()
+                && keys.get(targetIdx).equalsIgnoreCase(linkTarget)) {
+            byte[] targetData = readRecord(recordOffsets[targetIdx]);
+            if (targetData != null) {
+                int tlen = targetData.length;
+                while (tlen > 0 && targetData[tlen - 1] == 0) tlen--;
+                return new String(targetData, 0, tlen, charset);
+            }
+        }
+        return html;
     }
 
     @Override
@@ -614,6 +638,7 @@ public final class MDictDictionary implements Dictionary {
         return new DictionaryContent(guessMimeType(nameForMime),
                 ByteBuffer.wrap(data));
     }
+
 
     // -----------------------------------------------------------------------
     // Internal parsing helpers
