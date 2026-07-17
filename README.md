@@ -24,7 +24,7 @@
     height="80">](https://f-droid.org/packages/com.akylas.aard2)
 [<img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png"
     alt="Get it with Obtainium"
-    height="55">](https://github.com/Akylas/OSS-Dict)
+    height="80">](https://github.com/Akylas/OSS-Dict)
 </div>
 
  
