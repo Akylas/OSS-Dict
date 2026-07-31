@@ -91,6 +91,13 @@
     <string name="dictionaries_please_wait">Please wait</string>
     <string name="dictionaries_scanning_device">Scanning device for dictionaries…</string>
     <string name="dictionaries_confirm_forget">Forget "%1$s"?</string>
+    <string name="dictionaries_rename_title">Rename dictionary</string>
+    <string name="dictionaries_rename_hint">Display name</string>
+    <string name="dictionaries_original_label">Original: %1$s</string>
+    <string name="action_rename">Rename</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_reset">Reset</string>
     <string name="lookup_nothing_found">Nothing found</string>
     <string name="main_empty_bookmarks">No bookmarks</string>
     <string name="main_empty_history">No history</string>
