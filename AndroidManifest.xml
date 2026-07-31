@@ -4,7 +4,8 @@
 
     <queries>
         <intent>
-            <action android:name="android.intent.action.PROCESS_TEXT" />
+            <action
+                android:name="android.intent.action.PROCESS_TEXT" />
             <data android:mimeType="text/plain" />
         </intent>
     </queries>
@@ -13,6 +14,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-sdk tools:overrideLibrary="androidx.webkit" />
+
     <application
         android:name=".Application"
         android:allowBackup="true"
@@ -36,7 +38,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER" />
             </intent-filter>
-                        <intent-filter>
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -46,7 +48,6 @@
                 <data android:scheme="https" />
                 <data android:host="en.m.wikipedia.org" />
                 <data android:host="en.wikipedia.org" />
-                
             </intent-filter>
         </activity>
 
@@ -58,18 +59,22 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="aard2.lookup" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
             <intent-filter>
                 <action android:name="colordict.intent.action.SEARCH" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data android:mimeType="text/plain" />
             </intent-filter>
             <intent-filter>
@@ -114,6 +119,7 @@
                 <data android:host="ar.wiktionary.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -126,7 +132,7 @@
                 <data android:host="de.wikipedia.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
-        
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -139,7 +145,8 @@
                 <data android:host="de.wiktionary.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
-        <intent-filter>
+
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -151,7 +158,8 @@
                 <data android:host="en.wikipedia.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
-        <intent-filter>
+
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -163,6 +171,7 @@
                 <data android:host="en.wiktionary.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -175,6 +184,7 @@
                 <data android:host="es.wikipedia.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -187,6 +197,7 @@
                 <data android:host="es.wiktionary.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -199,6 +210,7 @@
                 <data android:host="fa.wikipedia.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -211,6 +223,7 @@
                 <data android:host="fa.wiktionary.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -223,6 +236,7 @@
                 <data android:host="fr.wikipedia.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -235,6 +249,7 @@
                 <data android:host="fr.wiktionary.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -247,6 +262,7 @@
                 <data android:host="it.wikipedia.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -259,6 +275,7 @@
                 <data android:host="it.wiktionary.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -271,6 +288,7 @@
                 <data android:host="ja.wikipedia.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -283,6 +301,7 @@
                 <data android:host="ja.wiktionary.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -295,6 +314,7 @@
                 <data android:host="nl.wikipedia.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -307,6 +327,7 @@
                 <data android:host="nl.wiktionary.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -319,6 +340,7 @@
                 <data android:host="pl.wikipedia.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -331,6 +353,7 @@
                 <data android:host="pl.wiktionary.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -343,6 +366,7 @@
                 <data android:host="pt.wikipedia.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -355,6 +379,7 @@
                 <data android:host="pt.wiktionary.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -367,6 +392,7 @@
                 <data android:host="ru.wikipedia.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -379,6 +405,7 @@
                 <data android:host="ru.wiktionary.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -391,6 +418,7 @@
                 <data android:host="uk.wikipedia.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -403,6 +431,7 @@
                 <data android:host="uk.wiktionary.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -415,6 +444,7 @@
                 <data android:host="zh.wikipedia.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -427,7 +457,9 @@
                 <data android:host="zh.wiktionary.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
+
         </activity>
+
         <uses-library
             android:required="false"
             android:name="com.sec.android.app.multiwindow" />

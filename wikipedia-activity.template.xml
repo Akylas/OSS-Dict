@@ -1,8 +1,3 @@
-        <activity-alias
-            android:enabled="false"
-            android:name="{lang}.{project}.org"
-            android:targetActivity=".article.ArticleCollectionActivity"
-            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -15,4 +10,3 @@
                 <data android:host="{lang}.{project}.org" />
                 <data android:pathPrefix="/wiki" />
             </intent-filter>
-        </activity-alias>
