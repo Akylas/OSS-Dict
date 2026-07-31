@@ -32,6 +32,11 @@ import itkach.slob.Slob;
 
 public class ArticleCollectionViewModel extends AndroidViewModel {
     public static final String TAG = ArticleCollectionViewModel.class.getSimpleName();
+    /**
+     * How long a lookup waits for dictionaries to finish loading. Only ever reached on a cold
+     * start triggered by an external intent, where this activity runs before loading is done.
+     */
+    private static final long INIT_TIMEOUT_MS = 20_000L;
     private final itkach.aard2.Application application;
     private final MutableLiveData<BlobListWrapper> blobListLiveData = new MutableLiveData<>();
     private final MutableLiveData<CharSequence> failureMessageLiveData = new MutableLiveData<>();
@@ -74,6 +79,10 @@ public class ArticleCollectionViewModel extends AndroidViewModel {
         ThreadUtils.postOnBackgroundThread(() -> {
             articleUri = intent.getData();
             int currentPosition = intent.getIntExtra("position", 0);
+            if (!SlobHelper.getInstance().awaitInitialized(INIT_TIMEOUT_MS)) {
+                // Search anyway with whatever loaded so far: no worse than failing outright.
+                Log.w(TAG, String.format("Dictionaries still loading after %d ms", INIT_TIMEOUT_MS));
+            }
             try {
                 BlobListWrapper result;
                 if (articleUri != null) {
@@ -92,12 +101,12 @@ public class ArticleCollectionViewModel extends AndroidViewModel {
                 }
                 if (result != null) {
                     int resultCount = result.size();
-                    if (resultCount != 0) {
-                        blobListLiveData.postValue(result);
+                    if (resultCount == 0) {
+                        failureMessageLiveData.postValue(application.getString(R.string.article_collection_nothing_found));
                     } else if (currentPosition >= resultCount) {
                         failureMessageLiveData.postValue(application.getString(R.string.article_collection_selected_not_available));
                     } else {
-                        failureMessageLiveData.postValue(application.getString(R.string.article_collection_nothing_found));
+                        blobListLiveData.postValue(result);
                     }
                 } else {
                     failureMessageLiveData.postValue(application.getString(R.string.article_collection_invalid_link));
