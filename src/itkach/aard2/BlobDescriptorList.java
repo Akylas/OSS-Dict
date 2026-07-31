@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.MainThread;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import android.icu.text.Collator;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Locale;
 
 import itkach.aard2.descriptor.BlobDescriptor;
+import itkach.aard2.descriptor.BlobDescriptorBackup;
 import itkach.aard2.descriptor.DescriptorStore;
 import itkach.aard2.dictionary.Dictionary;
 import itkach.aard2.dictionary.DictionaryEntry;
@@ -241,13 +243,45 @@ public class BlobDescriptorList extends AbstractList<BlobDescriptor> {
         }
         this.list.add(bd);
         store.save(bd);
-        if (this.list.size() > this.maxSize) {
-            Utils.sort(this.list, lastAccessComparator);
+        trimToMaxSize();
+        notifyDataSetChanged();
+        return bd;
+    }
+
+    /**
+     * Drops least recently accessed entries until the list fits {@link #maxSize}.
+     *
+     * <p>Loops because an import adds many entries at once, unlike {@link #add(Uri)}.</p>
+     */
+    protected void trimToMaxSize() {
+        if (this.list.size() <= this.maxSize) {
+            return;
+        }
+        Utils.sort(this.list, lastAccessComparator);
+        while (this.list.size() > this.maxSize) {
             BlobDescriptor lru = this.list.remove(this.list.size() - 1);
             store.delete(lru.id);
         }
+    }
+
+    /**
+     * Merges descriptors read from a backup file into this list.
+     *
+     * <p>Nothing is replaced or removed: entries already present are skipped
+     * (see {@link BlobDescriptorBackup#selectNew}).</p>
+     *
+     * @return the number of entries actually added
+     */
+    @MainThread
+    public int importDescriptors(@NonNull List<BlobDescriptor> imported) {
+        List<BlobDescriptor> added = BlobDescriptorBackup.selectNew(this.list, imported);
+        for (BlobDescriptor bd : added) {
+            this.list.add(bd);
+            store.save(bd);
+        }
+        trimToMaxSize();
         notifyDataSetChanged();
-        return bd;
+        return added.size();
     }
 
     public BlobDescriptor remove(Uri contentUrl) {

@@ -1,5 +1,7 @@
 package itkach.aard2.prefs;
 
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -22,12 +24,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 import itkach.aard2.MainActivity;
 import itkach.aard2.R;
+import itkach.aard2.SlobHelper;
+import itkach.aard2.descriptor.BlobDescriptorBackup;
 import itkach.aard2.dictionaries.DictionaryFolderManager;
+import itkach.aard2.utils.ThreadUtils;
 import itkach.aard2.utils.Utils;
 import itkach.aard2.widget.RecyclerView;
 
@@ -75,6 +83,27 @@ public class SettingsFragment extends Fragment {
                         Toast.makeText(requireActivity(), R.string.msg_failed_to_read_file, Toast.LENGTH_LONG).show();
                     }
                 }
+            });
+
+    private static final String BACKUP_FILE_NAME = "oss-dict-backup.json";
+    private static final int BACKUP_MAX_CHARS = 8 * 1024 * 1024;
+
+    public final ActivityResultLauncher<String> backupExportChooser = registerForActivityResult(
+            new ActivityResultContracts.CreateDocument("application/json"),
+            uri -> {
+                if (uri == null) {
+                    return;
+                }
+                writeBackupTo(uri);
+            });
+
+    public final ActivityResultLauncher<String[]> backupImportChooser = registerForActivityResult(
+            new ActivityResultContracts.OpenDocument(),
+            uri -> {
+                if (uri == null) {
+                    return;
+                }
+                readBackupFrom(uri);
             });
 
     @Nullable private Uri pendingAutoLoadUri;
@@ -187,6 +216,82 @@ public class SettingsFragment extends Fragment {
         }
     }
     
+    /** Asks the user where to write the bookmarks/history backup. */
+    public void exportBackup() {
+        try {
+            backupExportChooser.launch(BACKUP_FILE_NAME);
+        } catch (ActivityNotFoundException e) {
+            Log.d(TAG, "No activity to create a document", e);
+            Toast.makeText(requireActivity(), R.string.msg_no_activity_to_get_content, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /** Asks the user for a backup file to merge into bookmarks and history. */
+    public void importBackup() {
+        try {
+            // Providers label .json inconsistently, so accept anything rather than hide the file.
+            backupImportChooser.launch(new String[]{"application/json", "text/plain", "*/*"});
+        } catch (ActivityNotFoundException e) {
+            Log.d(TAG, "No activity to open a document", e);
+            Toast.makeText(requireActivity(), R.string.msg_no_activity_to_get_content, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void writeBackupTo(@NonNull Uri uri) {
+        Context appContext = requireContext().getApplicationContext();
+        SlobHelper slobHelper = SlobHelper.getInstance();
+        // Snapshot here, on the main thread, so the file is written off a stable copy.
+        BlobDescriptorBackup.Content snapshot = slobHelper.snapshotForBackup();
+        int bookmarkCount = snapshot.bookmarks.size();
+        int historyCount = snapshot.history.size();
+        ThreadUtils.postOnBackgroundThread(() -> {
+            try (OutputStream outputStream = appContext.getContentResolver().openOutputStream(uri, "wt")) {
+                if (outputStream == null) {
+                    throw new IOException("Could not open " + uri + " for writing");
+                }
+                slobHelper.writeBackup(outputStream, snapshot);
+            } catch (IOException | SecurityException e) {
+                Log.w(TAG, "Failed to write backup", e);
+                showToast(appContext, appContext.getString(R.string.msg_backup_export_failed));
+                return;
+            }
+            showToast(appContext, appContext.getString(R.string.msg_backup_exported,
+                    bookmarkCount, historyCount));
+        });
+    }
+
+    private void readBackupFrom(@NonNull Uri uri) {
+        Context appContext = requireContext().getApplicationContext();
+        SlobHelper slobHelper = SlobHelper.getInstance();
+        ThreadUtils.postOnBackgroundThread(() -> {
+            BlobDescriptorBackup.Content content;
+            try (InputStream inputStream = appContext.getContentResolver().openInputStream(uri)) {
+                if (inputStream == null) {
+                    throw new IOException("Could not open " + uri + " for reading");
+                }
+                // Bounded read: the picked file is arbitrary, don't let it exhaust memory.
+                String json = Utils.readStream(inputStream, BACKUP_MAX_CHARS);
+                content = slobHelper.readBackup(
+                        new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)));
+            } catch (IOException | SecurityException e) {
+                Log.w(TAG, "Failed to read backup", e);
+                showToast(appContext, appContext.getString(R.string.msg_backup_import_failed));
+                return;
+            }
+            ThreadUtils.postOnMainThread(() -> {
+                int bookmarksAdded = slobHelper.bookmarks.importDescriptors(content.bookmarks);
+                int historyAdded = slobHelper.history.importDescriptors(content.history);
+                Toast.makeText(appContext, appContext.getString(R.string.msg_backup_imported,
+                        bookmarksAdded, historyAdded), Toast.LENGTH_LONG).show();
+            });
+        });
+    }
+
+    private static void showToast(@NonNull Context appContext, @NonNull String message) {
+        ThreadUtils.postOnMainThread(() ->
+                Toast.makeText(appContext, message, Toast.LENGTH_LONG).show());
+    }
+
     public void clearAutoLoadFolder() {
         // Use DictionaryFolderManager singleton which handles everything
         DictionaryFolderManager.getInstance(requireContext()).clearAutoLoadFolder(null);

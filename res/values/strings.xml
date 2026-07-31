@@ -203,6 +203,17 @@
     <string name="settings_section_article_view">Article View</string>
     <string name="settings_section_lookup">Lookup</string>
     <string name="settings_section_features">Features</string>
+    <string name="settings_section_backup">Backup</string>
+
+    <!-- Backup section -->
+    <string name="setting_backup">Bookmarks &amp; History</string>
+    <string name="setting_backup_subtitle">Save to a file to move them to another device. Importing keeps what you already have.</string>
+    <string name="action_export">Export</string>
+    <string name="action_import">Import</string>
+    <string name="msg_backup_exported">Exported %1$d bookmarks, %2$d history entries</string>
+    <string name="msg_backup_imported">Imported %1$d bookmarks, %2$d history entries</string>
+    <string name="msg_backup_export_failed">Failed to write backup file</string>
+    <string name="msg_backup_import_failed">Not a valid backup file</string>
 
     <!-- About section -->
     <string name="setting_about_source">Source Code</string>

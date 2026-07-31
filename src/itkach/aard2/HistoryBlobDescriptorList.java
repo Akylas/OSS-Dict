@@ -4,7 +4,6 @@ import android.net.Uri;
 
 import itkach.aard2.descriptor.BlobDescriptor;
 import itkach.aard2.descriptor.DescriptorStore;
-import itkach.aard2.utils.Utils;
 
 public class HistoryBlobDescriptorList extends BlobDescriptorList {
     HistoryBlobDescriptorList(DescriptorStore<BlobDescriptor> store) {
@@ -32,11 +31,7 @@ public class HistoryBlobDescriptorList extends BlobDescriptorList {
         }
         list.add(bd);
         store.save(bd);
-        if (list.size() > maxSize) {
-            Utils.sort(list, lastAccessComparator);
-            BlobDescriptor lru = list.remove(list.size() - 1);
-            store.delete(lru.id);
-        }
+        trimToMaxSize();
         notifyDataSetChanged();
         return bd;
     }

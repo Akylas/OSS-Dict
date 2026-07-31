@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
+import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
@@ -12,6 +13,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,6 +27,7 @@ import java.util.Random;
 import java.util.Set;
 
 import itkach.aard2.descriptor.BlobDescriptor;
+import itkach.aard2.descriptor.BlobDescriptorBackup;
 import itkach.aard2.descriptor.DescriptorStore;
 import itkach.aard2.descriptor.SlobDescriptor;
 import itkach.aard2.dictionary.Dictionary;
@@ -95,7 +99,9 @@ public final class SlobHelper {
         bookmarkStore = new DescriptorStore<>(mapper, application.getDir("bookmarks", Context.MODE_PRIVATE));
         historyStore = new DescriptorStore<>(mapper, application.getDir("history", Context.MODE_PRIVATE));
         dictionaries = new SlobDescriptorList(dictStore);
-        bookmarks = new BlobDescriptorList(bookmarkStore);
+        // Bookmarks are kept uncapped: they are user curated, and restoring a backup from
+        // another device must not silently drop entries. History stays capped.
+        bookmarks = new BlobDescriptorList(bookmarkStore, Integer.MAX_VALUE);
         history = new HistoryBlobDescriptorList(historyStore);
         lastLookupResult = new LookupResult();
         random = new Random();
@@ -185,6 +191,35 @@ public final class SlobHelper {
     /** True when the server could not start because INTERNET permission is denied. */
     public boolean isServerBlocked() {
         return serverBlocked;
+    }
+
+    /**
+     * Copies the current bookmarks and history so a backup can be written off the main thread
+     * without racing with list updates.
+     */
+    @MainThread
+    @NonNull
+    public BlobDescriptorBackup.Content snapshotForBackup() {
+        return new BlobDescriptorBackup.Content(
+                new ArrayList<>(bookmarks.getList()), new ArrayList<>(history.getList()));
+    }
+
+    /** Writes a snapshot taken by {@link #snapshotForBackup()} as a backup document. */
+    @WorkerThread
+    public void writeBackup(@NonNull OutputStream out, @NonNull BlobDescriptorBackup.Content content)
+            throws IOException {
+        BlobDescriptorBackup.write(out, mapper, content.bookmarks, content.history,
+                System.currentTimeMillis());
+    }
+
+    /**
+     * Parses a backup document. Applying it to the lists must happen on the main thread, see
+     * {@link BlobDescriptorList#importDescriptors(List)}.
+     */
+    @WorkerThread
+    @NonNull
+    public BlobDescriptorBackup.Content readBackup(@NonNull InputStream in) throws IOException {
+        return BlobDescriptorBackup.read(in, mapper);
     }
 
     /**

@@ -55,6 +55,7 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
     private static final int VIEW_TYPE_USER_STYLES    = 5;
     private static final int VIEW_TYPE_CLEAR_CACHE    = 6;
     private static final int VIEW_TYPE_ABOUT          = 7;
+    private static final int VIEW_TYPE_BACKUP         = 8;
 
     // Stable item IDs – never change these values
     private static final long ID_SECTION_APPEARANCE   = 101;
@@ -63,6 +64,7 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
     private static final long ID_SECTION_ARTICLE_VIEW = 104;
     private static final long ID_SECTION_LOOKUP       = 105;
     private static final long ID_SECTION_FEATURES     = 106;
+    private static final long ID_SECTION_BACKUP       = 107;
 
     private static final long ID_UI_THEME             = 201;
     private static final long ID_FORCE_DARK           = 202;
@@ -90,6 +92,8 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
     private static final long ID_DISABLE_HISTORY      = 704;
 
     private static final long ID_ABOUT                = 801;
+
+    private static final long ID_BACKUP               = 901;
 
     // -------------------------------------------------------------------------
     // Functional interface for boolean preference read/write
@@ -173,6 +177,11 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
     static class ClearCacheItem extends Item {
         @Override public int getViewType()  { return VIEW_TYPE_CLEAR_CACHE; }
         @Override public long getStableId() { return ID_CLEAR_CACHE; }
+    }
+
+    static class BackupItem extends Item {
+        @Override public int getViewType()  { return VIEW_TYPE_BACKUP; }
+        @Override public long getStableId() { return ID_BACKUP; }
     }
 
     static class AboutItem extends Item {
@@ -321,6 +330,10 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
                     @Override public void set(boolean v) { AppPrefs.setDisableHistory(v); }
                 }));
 
+        // --- Backup ---
+        list.add(new SectionHeaderItem(ID_SECTION_BACKUP, R.string.settings_section_backup));
+        list.add(new BackupItem());
+
         // --- About (always last) ---
         list.add(new AboutItem());
 
@@ -358,6 +371,7 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
             case VIEW_TYPE_AUTO_LOAD_FOLDER: layoutRes = R.layout.settings_auto_load_folder_item; break;
             case VIEW_TYPE_USER_STYLES:      layoutRes = R.layout.settings_user_styles_item;      break;
             case VIEW_TYPE_CLEAR_CACHE:      layoutRes = R.layout.settings_clear_cache_item;      break;
+            case VIEW_TYPE_BACKUP:           layoutRes = R.layout.settings_backup_item;           break;
             case VIEW_TYPE_ABOUT:            layoutRes = R.layout.settings_about_item;            break;
             default: throw new RuntimeException("Unknown view type: " + viewType);
         }
@@ -376,6 +390,7 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
             case VIEW_TYPE_AUTO_LOAD_FOLDER: bindAutoLoadFolder(holder);                           break;
             case VIEW_TYPE_USER_STYLES:      bindUserStyles(holder);                               break;
             case VIEW_TYPE_CLEAR_CACHE:      bindClearCache(holder);                               break;
+            case VIEW_TYPE_BACKUP:           bindBackup(holder);                                   break;
             case VIEW_TYPE_ABOUT:            bindAbout(holder);                                    break;
         }
     }
@@ -578,6 +593,23 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
                         })
                         .setNegativeButton(R.string.action_no, null)
                         .show());
+    }
+
+    private void bindBackup(@NonNull ViewHolder holder) {
+        View view = holder.itemView;
+        MaterialButton exportBtn = view.findViewById(R.id.export_backup_button);
+        MaterialButton importBtn = view.findViewById(R.id.import_backup_button);
+
+        exportBtn.setOnClickListener(v -> {
+            if (fragment instanceof SettingsFragment) {
+                ((SettingsFragment) fragment).exportBackup();
+            }
+        });
+        importBtn.setOnClickListener(v -> {
+            if (fragment instanceof SettingsFragment) {
+                ((SettingsFragment) fragment).importBackup();
+            }
+        });
     }
 
     private void bindAbout(@NonNull ViewHolder holder) {
