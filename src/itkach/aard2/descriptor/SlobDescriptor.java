@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
-import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -54,6 +53,15 @@ public class SlobDescriptor extends BaseDescriptor {
 
     @JsonProperty("tags")
     public Map<String, String> tags = new HashMap<>();
+
+    /**
+     * User-defined name shown instead of the dictionary's own label.  Kept in
+     * its own field because {@link #tags} is overwritten on every load.
+     * {@code null} when the user has not renamed the dictionary.
+     */
+    @JsonProperty("displayName")
+    @Nullable
+    public String displayName;
 
     @JsonProperty("active")
     public boolean active = true;
@@ -211,10 +219,27 @@ public class SlobDescriptor extends BaseDescriptor {
     // Display helpers
     // -----------------------------------------------------------------------
 
+    /**
+     * Returns the name to display for this dictionary: the user-defined
+     * {@link #displayName} when set, the dictionary's own label otherwise.
+     */
     @NonNull
     public String getLabel() {
+        if (displayName != null && !displayName.trim().isEmpty()) {
+            return displayName;
+        }
+        return getOriginalLabel();
+    }
+
+    /**
+     * Returns the label embedded in the dictionary file, ignoring any
+     * user-defined {@link #displayName}.
+     */
+    @NonNull
+    public String getOriginalLabel() {
         String label = tags.get(SlobTags.TAG_LABEL);
-        if (TextUtils.isEmpty(label)) {
+        // Plain null/empty checks (not TextUtils) so this stays unit-testable.
+        if (label == null || label.isEmpty()) {
             return "???";
         }
         return label;

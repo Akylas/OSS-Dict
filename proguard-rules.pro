@@ -39,6 +39,7 @@
     java.lang.String path;
     java.lang.String mddPath;
     java.util.Map tags;
+    java.lang.String displayName;
     boolean active;
     long priority;
     long blobCount;

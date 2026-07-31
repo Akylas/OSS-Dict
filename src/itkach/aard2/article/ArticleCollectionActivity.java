@@ -211,7 +211,7 @@ public class ArticleCollectionActivity extends AppCompatActivity
         CharSequence pageTitle = pagerAdapter.getPageTitle(position);
         ActionBar actionBar = requireActionBar();
         if (entry != null) {
-            String dictLabel = entry.owner.getLabel();
+            String dictLabel = SlobHelper.getInstance().getDisplayLabel(entry.owner);
             actionBar.setTitle(dictLabel);
             if (!AppPrefs.disableHistory() && !isHistory) {
                 SlobHelper slobHelper = SlobHelper.getInstance();
