@@ -122,6 +122,18 @@ lane :build_flavor do |params|
     git_commit(path: ["./*.gradle"], message: "chore: new build", allow_nothing_to_commit: true)
   end
 
+  tag = "#{tag_prefix}#{version}/#{versionCode}";
+  changelog = get_changelog(platform:platform, flavor:flavor, commit_url:commit_url)
+  puts "changelog:"  + changelog
+
+  # release notes MUST be committed before the build: AGP embeds the build time HEAD sha in
+  # META-INF/version-control-info.textproto and the tag is later put on HEAD. Any commit created
+  # between the build and the tag makes tag != APK revision, which breaks F-Droid reproducible
+  # builds (issue #86). Nothing may commit after build() and before add_git_tag.
+  if (options[:publish] != false && platform == 'android')
+    write_changelog(version:versionCode, changelog: flavor != 'github' ? changelog : get_changelog(platform:platform, flavor:'store', commit_url:commit_url));
+  end
+
   build_output = build(flavor: flavor, options: options)
   puts "build_output #{JSON.pretty_generate(build_output)}"
 
@@ -131,13 +143,14 @@ lane :build_flavor do |params|
     push_to_git_remote(tags:false)
   end
 
-  tag = "#{tag_prefix}#{version}/#{versionCode}";
-  changelog = get_changelog(platform:platform, flavor:flavor, commit_url:commit_url)
-  puts "changelog:"  + changelog
-
   if (options[:publish] != false)
-    if (platform == 'android')
-      write_changelog(version:versionCode, changelog: flavor != 'github' ? changelog : get_changelog(platform:platform, flavor:'store', commit_url:commit_url));
+    # tag the exact commit that was built and push it before creating the release, so GitHub
+    # attaches the release to it instead of creating the tag itself at the (stale) remote HEAD
+    if (options[:create_tag] != false)
+      if !git_tag_exists(tag: tag)
+        add_git_tag(tag: tag, force: true)
+        push_git_tags(force: true)
+      end
     end
     case flavor
     when 'appcenter'
@@ -169,12 +182,6 @@ lane :build_flavor do |params|
     #   end
       when 'alpha','beta','production'
         upload_store(changelog:changelog, version: version, versionCode: versionCode, flavor:flavor, options:options, build_output:build_output)
-    end
-    if (options[:create_tag] != false)
-      if !git_tag_exists(tag: tag)
-        add_git_tag(tag: tag, force: true)
-        push_git_tags(force: true)
-      end
     end
     # we need to pull to be able to push again
     git_pull
