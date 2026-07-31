@@ -50,7 +50,7 @@ public final class BlobDescriptorBackup {
         @NonNull
         public final List<BlobDescriptor> history;
 
-        Content(@NonNull List<BlobDescriptor> bookmarks, @NonNull List<BlobDescriptor> history) {
+        public Content(@NonNull List<BlobDescriptor> bookmarks, @NonNull List<BlobDescriptor> history) {
             this.bookmarks = bookmarks;
             this.history = history;
         }
