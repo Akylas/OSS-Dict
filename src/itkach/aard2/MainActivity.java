@@ -43,8 +43,8 @@ import itkach.aard2.dictionaries.DictionaryListFragment;
 import itkach.aard2.lookup.LookupFragment;
 import itkach.aard2.prefs.AppPrefs;
 import itkach.aard2.prefs.SettingsFragment;
-import itkach.aard2.slob.SlobServer;
 import itkach.aard2.utils.ClipboardUtils;
+import itkach.aard2.utils.ThreadUtils;
 import itkach.aard2.utils.Utils;
 
 public class MainActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener,
@@ -57,32 +57,52 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     private BottomNavigationView bottomNavigationView;
     private FloatingActionButton fab;
     private int oldPosition = -1;
+    @Nullable
+    private AlertDialog internetPermissionDialog;
 
     @NonNull
     public ActionBar requireActionBar() {
         return Objects.requireNonNull(getSupportActionBar());
     }
 
+    /**
+     * Starts the embedded web server if it is not running yet and warns the user when it
+     * cannot be started because network access is disabled for the app. Runs on every
+     * foreground so that granting the permission from app settings recovers without a
+     * restart.
+     */
     private void checkInternetPermission() {
-        // Check if the app can use ServerSocket by actually testing it
-        // This is the most reliable way to detect if network access is disabled in app settings
-        boolean canUseSocket = SlobServer.canUseServerSocket(SlobHelper.LOCALHOST, 0);
-        
-        if (!canUseSocket) {
-            Log.w(TAG, "ServerSocket creation blocked - network access is disabled for this app");
-            // Show alert dialog explaining the app needs network access
-            new AlertDialog.Builder(this)
-                    .setTitle(R.string.permission_internet_required_title)
-                    .setMessage(R.string.permission_internet_required_message)
-                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                        Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                        intent.setData(Uri.parse("package:" + getPackageName()));
-                        startActivity(intent);
-                    })
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .setCancelable(true)
-                    .show();
-        }
+        ThreadUtils.postOnBackgroundThread(() -> {
+            boolean serverStarted = SlobHelper.getInstance().ensureServerStarted();
+            ThreadUtils.postOnMainThread(() -> {
+                if (isFinishing() || isDestroyed()) {
+                    return;
+                }
+                if (serverStarted) {
+                    if (internetPermissionDialog != null) {
+                        internetPermissionDialog.dismiss();
+                        internetPermissionDialog = null;
+                    }
+                    return;
+                }
+                Log.w(TAG, "Web server could not be started - network access is disabled for this app");
+                if (internetPermissionDialog != null) {
+                    return;
+                }
+                internetPermissionDialog = new AlertDialog.Builder(this)
+                        .setTitle(R.string.permission_internet_required_title)
+                        .setMessage(R.string.permission_internet_required_message)
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                            Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            intent.setData(Uri.parse("package:" + getPackageName()));
+                            startActivity(intent);
+                        })
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .setCancelable(true)
+                        .setOnDismissListener(dialog -> internetPermissionDialog = null)
+                        .show();
+            });
+        });
     }
 
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -91,10 +111,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         Utils.updateNightMode();
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
-        
-        // Check if INTERNET permission is granted
-        checkInternetPermission();
-        
+
         appSectionsPagerAdapter = new AppSectionsPagerAdapter(getSupportFragmentManager(), AppPrefs.disableBookmarks(), AppPrefs.disableHistory());
 
         layout = findViewById(R.id.layout);
@@ -235,6 +252,12 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        checkInternetPermission();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         AppPrefs.getPreferences().registerOnSharedPreferenceChangeListener(this);
@@ -252,6 +275,15 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             inputMethodManager.hideSoftInputFromWindow(focusedView.getWindowToken(), 0);
         }
         super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (internetPermissionDialog != null) {
+            internetPermissionDialog.dismiss();
+            internetPermissionDialog = null;
+        }
+        super.onDestroy();
     }
 
     @Override

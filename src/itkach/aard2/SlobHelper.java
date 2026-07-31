@@ -83,8 +83,9 @@ public final class SlobHelper {
     @NonNull
     public final LookupResult lastLookupResult;
 
-    private int port = -1;
+    private volatile int port = -1;
     private volatile boolean initialized;
+    private volatile boolean serverBlocked;
 
     private SlobHelper(@NonNull Application application) {
         this.application = application;
@@ -106,19 +107,47 @@ public final class SlobHelper {
             return;
         }
         initialized = true;
-        long t0 = System.currentTimeMillis();
+        ensureServerStarted();
+        dictionaries.load();
+        bookmarks.load();
+        history.load();
+    }
+
+    /**
+     * Starts the embedded web server if it is not running yet.
+     *
+     * <p>Never throws: when the server cannot be started the app stays usable for
+     * lookup, only article rendering is unavailable. The most common cause is a
+     * denied {@code android.permission.INTERNET} (permission manager, firewall
+     * app), in which case retrying other ports is pointless and skipped.</p>
+     *
+     * <p>Called again whenever the UI comes to the foreground, so granting the
+     * permission and returning to the app recovers without a restart.</p>
+     *
+     * @return true when the server is running
+     */
+    @WorkerThread
+    public synchronized boolean ensureServerStarted() {
+        if (port > 0) {
+            return true;
+        }
+        long startTime = System.currentTimeMillis();
         int portCandidate = PREFERRED_PORT;
         try {
             SlobServer.startServer(LOCALHOST, portCandidate);
             port = portCandidate;
         } catch (IOException e) {
             Log.w(TAG, String.format("Failed to start on preferred port %d", portCandidate), e);
+            if (SlobServer.isPermissionDenied(e)) {
+                serverBlocked = true;
+                Log.e(TAG, "Cannot create a server socket: INTERNET permission is denied");
+                return false;
+            }
             Set<Integer> seen = new HashSet<>();
             seen.add(PREFERRED_PORT);
             Random rand = new Random();
             int attemptCount = 0;
-            Exception lastError = e;
-            while (true) {
+            while (port <= 0) {
                 int value = 1 + (int) Math.floor((65535 - 1025) * rand.nextDouble());
                 portCandidate = 1024 + value;
                 if (seen.contains(portCandidate)) {
@@ -129,20 +158,33 @@ public final class SlobHelper {
                 try {
                     SlobServer.startServer(LOCALHOST, portCandidate);
                     port = portCandidate;
-                    break;
-                } catch (IOException e1) {
-                    lastError = e1;
-                    Log.w(TAG, String.format("Failed to start on port %d", portCandidate), e1);
-                }
-                if (attemptCount >= 20) {
-                    throw new RuntimeException("Failed to start web server", lastError);
+                } catch (IOException retryError) {
+                    Log.w(TAG, String.format("Failed to start on port %d", portCandidate), retryError);
+                    if (SlobServer.isPermissionDenied(retryError)) {
+                        serverBlocked = true;
+                        Log.e(TAG, "Cannot create a server socket: INTERNET permission is denied");
+                        return false;
+                    }
+                    if (attemptCount >= 20) {
+                        Log.e(TAG, "Failed to start web server", retryError);
+                        return false;
+                    }
                 }
             }
         }
-        Log.d(TAG, String.format("Started web server on port %d in %d ms", port, (System.currentTimeMillis() - t0)));
-        dictionaries.load();
-        bookmarks.load();
-        history.load();
+        serverBlocked = false;
+        Log.d(TAG, String.format("Started web server on port %d in %d ms", port, (System.currentTimeMillis() - startTime)));
+        return true;
+    }
+
+    /** True when the embedded web server is running and articles can be served. */
+    public boolean isServerAvailable() {
+        return port > 0;
+    }
+
+    /** True when the server could not start because INTERNET permission is denied. */
+    public boolean isServerBlocked() {
+        return serverBlocked;
     }
 
     /**
