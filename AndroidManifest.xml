@@ -30,6 +30,7 @@
         <activity
             android:name=".MainActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
+            android:launchMode="singleTop"
             android:windowSoftInputMode="stateHidden"
             android:exported="true">
             <intent-filter>
@@ -49,6 +50,10 @@
                 <data android:host="en.m.wikipedia.org" />
                 <data android:host="en.wikipedia.org" />
             </intent-filter>
+
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
 
         <activity

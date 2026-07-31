@@ -14,6 +14,8 @@
     <string name="action_sort_by_title">By Title</string>
     <string name="action_sort_by_time">By Time</string>
     <string name="action_lookup">Lookup</string>
+    <string name="shortcut_lookup_short_label">Lookup</string>
+    <string name="shortcut_lookup_long_label">Look up a word</string>
     <!--
     English only uses "one" and "other" for plurals.
     Other quantities are included as a fallback if some translation
