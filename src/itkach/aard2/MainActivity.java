@@ -107,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
     public void onCreate(@Nullable Bundle savedInstanceState) {
         EdgeToEdge.enable(this);
+        savedInstanceState = Utils.sanitizeSavedState(savedInstanceState, getClassLoader());
         super.onCreate(savedInstanceState);
         Utils.updateNightMode();
         setContentView(R.layout.activity_main);

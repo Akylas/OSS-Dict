@@ -54,3 +54,8 @@
     @android.webkit.JavascriptInterface <methods>;
 }
 
+# Saved instance state written by one release is unparcelled by the next: the class
+# names stored in the bundle must still resolve after an update, so they must not
+# move between releases. The CREATOR members themselves come from the default file.
+-keepnames class * implements android.os.Parcelable
+

@@ -105,7 +105,7 @@ android {
 //        debug {
 //            minifyEnabled true
 //            shrinkResources true
-//            proguardFiles("proguard-rules.pro")
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), "proguard-rules.pro"
 //            zipAlignEnabled true
 //        }
         release {
@@ -114,7 +114,9 @@ android {
             if (System.getenv("KEYSTORE") != null) {
                 signingConfig signingConfigs.release
             }
-            proguardFiles("proguard-rules.pro")
+            // the default file carries the stock rules (Parcelable CREATOR, native methods,
+            // @Keep, View animator accessors) - listing only our file would drop them
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), "proguard-rules.pro"
         }
     }
     buildFeatures {

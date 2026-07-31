@@ -75,6 +75,7 @@ public class ArticleCollectionActivity extends AppCompatActivity
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         EdgeToEdge.enable(this);
+        savedInstanceState = Utils.sanitizeSavedState(savedInstanceState, getClassLoader());
         super.onCreate(savedInstanceState);
         Utils.updateNightMode();
         setContentView(R.layout.activity_article_collection_loading);
