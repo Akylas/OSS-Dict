@@ -49,6 +49,12 @@ import itkach.aard2.utils.Utils;
 
 public class MainActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener,
         ViewPager.OnPageChangeListener, SharedPreferences.OnSharedPreferenceChangeListener {
+    /**
+     * Sent by the launcher shortcut declared in res/xml/shortcuts.xml. That file cannot
+     * reference BuildConfig, so the action is spelled out there - keep both in sync.
+     */
+    public static final String ACTION_LOOKUP = BuildConfig.APPLICATION_ID + ".action.LOOKUP";
+
     private static final String TAG = MainActivity.class.getSimpleName();
     private AppSectionsPagerAdapter appSectionsPagerAdapter;
     private AppBarLayout appBarLayout;
@@ -57,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     private BottomNavigationView bottomNavigationView;
     private FloatingActionButton fab;
     private int oldPosition = -1;
+    private boolean lookupFocusRequested;
     @Nullable
     private AlertDialog internetPermissionDialog;
 
@@ -135,6 +142,12 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         } else if (SlobHelper.getInstance().dictionaries.isEmpty()) {
             viewPager.setCurrentItem(3);
         }
+
+        if (savedInstanceState == null) {
+            //Only on a fresh start: getIntent() keeps returning the shortcut intent, so
+            //handling it on a state restore would steal focus again after a process death.
+            handleIntent(getIntent());
+        }
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 //            getWindow().setNavigationBarContrastEnforced(false);
 //        }
@@ -175,6 +188,37 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             return WindowInsetsCompat.CONSUMED;
         });
 
+    }
+
+    @Override
+    protected void onNewIntent(@NonNull Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIntent(intent);
+    }
+
+    /**
+     * Handles the launcher shortcut: shows the lookup tab and asks the lookup fragment to
+     * take focus. The fragment owns the search view, so the request is handed over as a
+     * flag it consumes while its options menu is (re)built.
+     */
+    private void handleIntent(@Nullable Intent intent) {
+        if (intent == null || !ACTION_LOOKUP.equals(intent.getAction())) {
+            return;
+        }
+        lookupFocusRequested = true;
+        viewPager.setCurrentItem(0);
+        viewPager.post(this::invalidateOptionsMenu);
+    }
+
+    /**
+     * Returns whether the lookup fragment should grab focus, clearing the request so that
+     * it only applies once.
+     */
+    public boolean consumeLookupFocusRequest() {
+        boolean requested = lookupFocusRequested;
+        lookupFocusRequested = false;
+        return requested;
     }
 
     @Override

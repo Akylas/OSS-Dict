@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Static launcher shortcuts (API 25+, ignored below that).
+    The intent target cannot reference BuildConfig, hence the literal applicationId.
+-->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <shortcut
+        tools:ignore="UnusedAttribute"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_search"
+        android:shortcutId="lookup"
+        android:shortcutLongLabel="@string/shortcut_lookup_long_label"
+        android:shortcutShortLabel="@string/shortcut_lookup_short_label">
+        <intent
+            android:action="com.akylas.aard2.action.LOOKUP"
+            android:targetClass="itkach.aard2.MainActivity"
+            android:targetPackage="com.akylas.aard2" />
+    </shortcut>
+</shortcuts>

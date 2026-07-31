@@ -1,5 +1,6 @@
 package itkach.aard2.lookup;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -7,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -117,13 +119,26 @@ public class LookupFragment extends BaseListFragment implements LookupListener, 
     @Override
     public void onPrepareOptionsMenu(@NonNull Menu menu) {
         super.onPrepareOptionsMenu(menu);
+        FragmentActivity activity = requireActivity();
+        boolean focusRequested = activity instanceof MainActivity
+                && ((MainActivity) activity).consumeLookupFocusRequest();
         if (AppPrefs.autoPasteInLookup()) {
             CharSequence clipboard = ClipboardUtils.take(requireContext());
             if (clipboard != null && viewModel != null) {
                 searchView.setQuery(clipboard.toString(), false);
                 viewModel.lookup(clipboard.toString());
+                if (focusRequested) {
+                    focusSearch();
+                }
                 return;
             }
+        }
+        if (focusRequested) {
+            //Launcher shortcut: start from an empty field instead of the last query. The
+            //query text listener clears the result list on its own.
+            searchView.setQuery("", false);
+            focusSearch();
+            return;
         }
        // String query = AppPrefs.getLastQuery();
        // searchView.setQuery(query, false);
@@ -131,6 +146,30 @@ public class LookupFragment extends BaseListFragment implements LookupListener, 
        //     viewModel.lookupLastQuery();
        // }
         searchView.setQuery(AppPrefs.getLastQuery(), false);
+    }
+
+    /**
+     * Gives the search view focus and shows the keyboard, overriding both the activity's
+     * stateHidden soft input mode and the clearFocus() done when the "show keyboard on
+     * lookup" preference is off. Posted because the view is not laid out yet while the
+     * options menu is being built.
+     */
+    private void focusSearch() {
+        searchView.requestFocus();
+        searchView.post(() -> {
+            View focused = searchView.findFocus();
+            //The fragment can be detached by the time this runs, for instance when
+            //another tab is selected right after the shortcut launch
+            Context context = getContext();
+            if (focused == null || context == null) {
+                return;
+            }
+            InputMethodManager inputMethodManager =
+                    (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (inputMethodManager != null) {
+                inputMethodManager.showSoftInput(focused, InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
     }
 
     @Override
