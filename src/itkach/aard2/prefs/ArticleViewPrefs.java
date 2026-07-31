@@ -48,6 +48,14 @@ public class ArticleViewPrefs extends Prefs {
         getInstance().prefs.edit().putBoolean("disable_js", disableJavaScript).apply();
     }
 
+    public static boolean disableSwipeNavigation() {
+        return getInstance().prefs.getBoolean("disable_swipe_nav", false);
+    }
+
+    public static void setDisableSwipeNavigation(boolean disableSwipeNavigation) {
+        getInstance().prefs.edit().putBoolean("disable_swipe_nav", disableSwipeNavigation).apply();
+    }
+
     public static int getPreferredZoomLevel() {
         return getInstance().prefs.getInt(PREF_TEXT_ZOOM, 100);
     }
