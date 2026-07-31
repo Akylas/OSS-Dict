@@ -80,6 +80,7 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
     private static final long ID_DISABLE_JS           = 501;
     private static final long ID_USER_STYLES          = 502;
     private static final long ID_CLEAR_CACHE          = 503;
+    private static final long ID_DISABLE_SWIPE_NAV    = 504;
 
     private static final long ID_SORT_BY_RANK         = 601;
     private static final long ID_AUTO_PASTE           = 602;
@@ -280,6 +281,12 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
                 new BoolPref() {
                     @Override public boolean get() { return ArticleViewPrefs.disableJavaScript(); }
                     @Override public void set(boolean v) { ArticleViewPrefs.setDisableJavaScript(v); }
+                }));
+        list.add(new SwitchItem(ID_DISABLE_SWIPE_NAV, R.string.setting_disable_swipe_navigation_title,
+                R.string.setting_disable_swipe_navigation_subtitle,
+                new BoolPref() {
+                    @Override public boolean get() { return ArticleViewPrefs.disableSwipeNavigation(); }
+                    @Override public void set(boolean v) { ArticleViewPrefs.setDisableSwipeNavigation(v); }
                 }));
         list.add(new UserStylesItem());
         list.add(new ClearCacheItem());

@@ -56,6 +56,7 @@ import itkach.aard2.SlobHelper;
 import itkach.aard2.dictionary.DictionaryEntry;
 import itkach.aard2.prefs.AppPrefs;
 import itkach.aard2.prefs.ArticleCollectionPrefs;
+import itkach.aard2.prefs.ArticleViewPrefs;
 import itkach.aard2.utils.ThreadUtils;
 import itkach.aard2.utils.Utils;
 import itkach.aard2.widget.ArticleWebView;
@@ -107,6 +108,7 @@ public class ArticleCollectionActivity extends AppCompatActivity
 
             viewPager = findViewById(R.id.pager);
             viewPager.setNestedScrollingEnabled(true);
+            applySwipeNavigationPref();
             pagerAdapter = new ArticleCollectionPagerAdapter(blobListWrapper, this);
             viewPager.setAdapter(pagerAdapter);
             TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(tabs, viewPager, true, (tab, position1) -> tab.setText(pagerAdapter.getPageTitle(position1)));
@@ -244,6 +246,12 @@ public class ArticleCollectionActivity extends AppCompatActivity
         }
     }
 
+    private void applySwipeNavigationPref() {
+        if (viewPager != null) {
+            viewPager.setUserInputEnabled(!ArticleViewPrefs.disableSwipeNavigation());
+        }
+    }
+
     SharedPreferences prefs() {
         return getSharedPreferences("articleCollection", Activity.MODE_PRIVATE);
     }
@@ -257,6 +265,7 @@ public class ArticleCollectionActivity extends AppCompatActivity
         super.onResume();
         Log.d(TAG, "[F] Resume");
         applyFullScreenPref();
+        applySwipeNavigationPref();
         prefs().registerOnSharedPreferenceChangeListener(this);
     }
 
