@@ -111,6 +111,9 @@ public class DictionaryListViewModel extends AndroidViewModel {
                 SlobHelper slobHelper = SlobHelper.getInstance();
                 SlobDescriptorList dictionaries = slobHelper.dictionaries;
                 SlobDescriptor newSd = SlobDescriptor.fromUri(getApplication(), newUri);
+                // The replacement is a new edition of the same dictionary: keep the name
+                // the user gave it, otherwise updating a file silently discards it.
+                newSd.displayName = dictionaryToBeReplaced.displayName;
                 if (!dictionaries.hasId(dictionaryToBeReplaced.id)) {
                     // Dictionary to be replaced does not exist for some reason
                     if (!dictionaries.hasId(newSd.id)) {
