@@ -369,7 +369,10 @@ public class ArticleCollectionActivity extends AppCompatActivity
         ArticleFragment af = pagerAdapter.getPrimaryItem();
         if (af != null) {
             ArticleWebView webView = af.getWebView();
-
+            // No web view when the article could not be displayed (see ArticleFragment)
+            if (webView == null) {
+                return super.onKeyLongPress(keyCode, event);
+            }
             if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
                 webView.pageUp(true);
                 return true;

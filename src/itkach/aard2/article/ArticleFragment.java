@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -132,6 +133,17 @@ public class ArticleFragment extends Fragment {
             View layout = inflater.inflate(R.layout.empty_view, container, false);
             ImageView icon = layout.findViewById(R.id.empty_icon);
             icon.setImageResource(R.drawable.ic_block);
+            setHasOptionsMenu(false);
+            return layout;
+        }
+
+        if (!SlobHelper.getInstance().isServerAvailable()) {
+            // Articles are served over a local socket, which needs the internet permission
+            View layout = inflater.inflate(R.layout.empty_view, container, false);
+            ImageView icon = layout.findViewById(R.id.empty_icon);
+            icon.setImageResource(R.drawable.ic_block);
+            TextView emptyText = layout.findViewById(R.id.empty_text);
+            emptyText.setText(R.string.article_internet_permission_required);
             setHasOptionsMenu(false);
             return layout;
         }

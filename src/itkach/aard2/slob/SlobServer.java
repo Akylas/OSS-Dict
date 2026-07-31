@@ -1,6 +1,8 @@
 package itkach.aard2.slob;
 
 import android.net.Uri;
+import android.system.ErrnoException;
+import android.system.OsConstants;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -42,6 +44,8 @@ import itkach.slob.Slob;
 // Format: host:port/auth/dictId/key?blob=<id>#fragment
 // Returns: Content with designated types and caching info.
 public class SlobServer extends Thread {
+    private static final String TAG = SlobServer.class.getSimpleName();
+
     public static final String PAGE_NOT_FOUND = "404";
     public static final String OKAY = "200";
     public static final String CREATED = "201";
@@ -435,7 +439,7 @@ public class SlobServer extends Thread {
             }
             sSlobServer = new SlobServer(ip, port);
             sSlobServer.start();
-            System.out.println("Server Started");
+            Log.d(TAG, "Server started");
         }
     }
 
@@ -444,7 +448,7 @@ public class SlobServer extends Thread {
             if (sSlobServer != null && sSlobServer.isAlive()) {
                 sSlobServer.interrupt();
             }
-            System.out.println("Server stopped");
+            Log.d(TAG, "Server stopped");
         }
     }
 
@@ -459,31 +463,24 @@ public class SlobServer extends Thread {
     }
 
     /**
-     * Test if the app has permission to use ServerSocket.
+     * Tells whether {@code error} was caused by the app lacking
+     * {@code android.permission.INTERNET}. Without that permission the kernel
+     * refuses socket creation with EACCES, surfaced as a
+     * {@link SocketException} wrapping an {@link ErrnoException}.
      */
-    public static boolean canUseServerSocket(@NonNull String ip, int port) {
-        Log.d("SlobServer", "canUseServerSocket " + ip + " " + port);
-        ServerSocket testSocket = null;
-        try {
-            testSocket = new ServerSocket(port, 0, InetAddress.getByName(ip));
-            return true;
-        } catch (SecurityException e) {
-            e.printStackTrace();
-            return false;
-        } catch (SocketException e) {
-            e.printStackTrace();
-            return !e.getMessage().contains(" ECONNREFUSED");
-        } catch (IOException e) {
-            e.printStackTrace();
-            return true;
-        } finally {
-            if (testSocket != null) {
-                try {
-                    testSocket.close();
-                } catch (IOException ignored) {
-                }
+    public static boolean isPermissionDenied(@NonNull IOException error) {
+        for (Throwable cause = error; cause != null; cause = cause.getCause()) {
+            if (cause instanceof ErrnoException) {
+                int errno = ((ErrnoException) cause).errno;
+                return errno == OsConstants.EACCES || errno == OsConstants.EPERM;
+            }
+            String message = cause.getMessage();
+            if (message != null && (message.contains("EACCES") || message.contains("EPERM")
+                    || message.contains("Permission denied"))) {
+                return true;
             }
         }
+        return false;
     }
 
     @NonNull

@@ -191,6 +191,7 @@
     <string name="setting_sort_lookup_by_rank">Sort results by best match first</string>
     <string name="permission_internet_required_title">Internet Permission Required</string>
     <string name="permission_internet_required_message">This app requires internet permission to work correctly. Even though the app does not use internet directly, it needs this permission for internal socket communication. Please enable the internet permission in your device settings.</string>
+    <string name="article_internet_permission_required">Can\'t display this article: the internet permission is needed for internal socket communication. Please enable it in your device settings.</string>
     <string name="msg_permission_denied_notifications">Permission to post notifications was denied. The app won\'t be able to notify you about new dictionaries.</string>
     <string name="rationale_notifications_needed">The app needs permission to post notifications so it can inform you when automatic folder loading finds new dictionaries.</string>
     <string name="action_allow">Allow</string>
