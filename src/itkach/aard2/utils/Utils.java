@@ -3,6 +3,7 @@ package itkach.aard2.utils;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -15,6 +16,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -94,6 +96,42 @@ public class Utils {
     public static boolean isNightMode(@NonNull Context context) {
         int nightModeFlags = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
         return nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
+    }
+
+    /**
+     * Reads the whole saved instance state eagerly so that a bundle which cannot be unparcelled
+     * is detected here instead of crashing inside {@code super.onCreate}. State saved by an
+     * earlier release stores class names as they were obfuscated back then; after an update those
+     * names may resolve to a different class or to none at all, which makes the framework throw
+     * {@link android.os.BadParcelableException} while restoring fragments. Dropping the state
+     * costs a fresh start, keeping it costs a start-up crash loop.
+     *
+     * @return the bundle itself when it can be read, null when it cannot
+     */
+    @Nullable
+    public static Bundle sanitizeSavedState(@Nullable Bundle savedState, @NonNull ClassLoader classLoader) {
+        if (savedState == null) {
+            return null;
+        }
+        try {
+            unparcelDeep(savedState, classLoader);
+        } catch (RuntimeException e) {
+            Log.w(TAG, "Unreadable saved instance state, starting without it:", e);
+            return null;
+        }
+        return savedState;
+    }
+
+    @SuppressWarnings("deprecation")
+    private static void unparcelDeep(@NonNull Bundle bundle, @NonNull ClassLoader classLoader) {
+        bundle.setClassLoader(classLoader);
+        // iterate over a copy: reading a value replaces it in the backing map
+        for (String key : new ArrayList<>(bundle.keySet())) {
+            Object value = bundle.get(key);
+            if (value instanceof Bundle) {
+                unparcelDeep((Bundle) value, classLoader);
+            }
+        }
     }
 
     @NonNull
