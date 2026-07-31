@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import itkach.aard2.descriptor.BlobDescriptor;
 import itkach.aard2.descriptor.BlobDescriptorBackup;
@@ -90,6 +92,8 @@ public final class SlobHelper {
     private volatile int port = -1;
     private volatile boolean initialized;
     private volatile boolean serverBlocked;
+    /** Opens once {@link #init()} is done loading, see {@link #awaitInitialized(long)}. */
+    private final CountDownLatch initLatch = new CountDownLatch(1);
 
     private SlobHelper(@NonNull Application application) {
         this.application = application;
@@ -107,16 +111,47 @@ public final class SlobHelper {
         random = new Random();
     }
 
+    /**
+     * Loads dictionaries, bookmarks and history and starts the embedded server.
+     *
+     * <p>{@code initialized} is raised up front on purpose: {@link #updateSlobs()} runs
+     * synchronously from within {@link #dictionaries}{@code .load()} (through the data set
+     * observer) and calls {@link #checkInitialized()}. Readiness for lookups is therefore
+     * published separately, through {@link #awaitInitialized(long)}.</p>
+     */
     @WorkerThread
     public void init() {
         if (initialized) {
             return;
         }
         initialized = true;
-        ensureServerStarted();
-        dictionaries.load();
-        bookmarks.load();
-        history.load();
+        try {
+            ensureServerStarted();
+            dictionaries.load();
+            bookmarks.load();
+            history.load();
+        } finally {
+            initLatch.countDown();
+        }
+    }
+
+    /**
+     * Blocks until {@link #init()} has finished loading. Callers that come straight from an
+     * external intent (see {@code ArticleCollectionViewModel}) would otherwise search an empty
+     * dictionary set on a cold start and report the article as missing.
+     *
+     * @param timeoutMillis how long to wait before giving up
+     * @return true when loading completed, false on timeout or interruption
+     */
+    @WorkerThread
+    public boolean awaitInitialized(long timeoutMillis) {
+        try {
+            return initLatch.await(timeoutMillis, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            Log.w(TAG, "Interrupted while waiting for initialization", e);
+            return false;
+        }
     }
 
     /**
