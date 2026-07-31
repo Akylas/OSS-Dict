@@ -98,6 +98,7 @@ public class DescriptorStore<T extends BaseDescriptor> {
                         d.tags.put(entry.getKey(), entry.getValue().asText(""));
                     }
                 }
+                d.displayName = getText(root, "displayName");
                 d.active = getBoolean(root, "active", true);
                 d.priority = getLong(root, "priority", 0L);
                 d.blobCount = getLong(root, "blobCount", 0L);
@@ -181,6 +182,7 @@ public class DescriptorStore<T extends BaseDescriptor> {
                 root.put("path", d.path);
                 root.put("mddPath", d.mddPath);
                 root.set("tags", mapper.valueToTree(d.tags));
+                root.put("displayName", d.displayName);
                 root.put("active", d.active);
                 root.put("priority", d.priority);
                 root.put("blobCount", d.blobCount);

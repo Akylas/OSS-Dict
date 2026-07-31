@@ -26,6 +26,31 @@ public class SlobDescriptorList extends BaseDescriptorList<SlobDescriptor> {
         return false;
     }
 
+    /**
+     * Looks a descriptor up by dictionary id.  Indexed rather than iterated: this runs
+     * on the main thread while binding list items, and a background folder scan can add
+     * or remove entries at the same time, which would break an iterator.
+     */
+    @Nullable
+    public SlobDescriptor getById(@Nullable String id) {
+        if (id == null) {
+            return null;
+        }
+        for (int index = 0; index < size(); index++) {
+            SlobDescriptor descriptor;
+            try {
+                descriptor = get(index);
+            } catch (IndexOutOfBoundsException e) {
+                // The list shrank while we were walking it
+                return null;
+            }
+            if (descriptor != null && id.equals(descriptor.id)) {
+                return descriptor;
+            }
+        }
+        return null;
+    }
+
     @Nullable
     public Dictionary resolve(@NonNull SlobDescriptor sd) {
         return SlobHelper.getInstance().getDictionary(sd.id);
