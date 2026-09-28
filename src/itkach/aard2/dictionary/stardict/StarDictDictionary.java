@@ -3,6 +3,7 @@ package itkach.aard2.dictionary.stardict;
 import android.content.Context;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.provider.DocumentsContract;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -1127,33 +1128,24 @@ public final class StarDictDictionary implements Dictionary {
                                           @NonNull Uri ifoUri,
                                           @NonNull String ifoPath,
                                           @NonNull String[] extensions) {
-        // For SAF content:// URIs, use DocumentFile API
+        // For SAF content:// URIs. A single-document URI has no reachable parent
+        // (SingleDocumentFile.getParentFile() is always null), so companions are
+        // only reachable through a tree URI: derive sibling document ids from the
+        // .ifo document id (path-style, e.g. "primary:Download/dict/name.ifo").
         if ("content".equals(ifoUri.getScheme())) {
-            DocumentFile ifoFile = DocumentFile.fromSingleUri(context, ifoUri);
-            if (ifoFile == null || !ifoFile.exists()) {
+            if (!DocumentsContract.isTreeUri(ifoUri)) {
                 return null;
             }
-            
-            DocumentFile parentDir = ifoFile.getParentFile();
-            if (parentDir == null || !parentDir.isDirectory()) {
+            String ifoDocumentId = DocumentsContract.getDocumentId(ifoUri);
+            if (!ifoDocumentId.endsWith(".ifo")) {
                 return null;
             }
-            
-            // Get base name without extension
-            String ifoName = ifoFile.getName();
-            if (ifoName == null || !ifoName.endsWith(".ifo")) {
-                return null;
-            }
-            String baseName = ifoName.substring(0, ifoName.length() - 4);
-            
-            // Search for companion files
-            DocumentFile[] files = parentDir.listFiles();
+            String baseDocumentId = ifoDocumentId.substring(0, ifoDocumentId.length() - 4);
             for (String ext : extensions) {
-                String targetName = baseName + ext;
-                for (DocumentFile file : files) {
-                    if (targetName.equals(file.getName())) {
-                        return file.getUri();
-                    }
+                Uri candidate = DocumentsContract.buildDocumentUriUsingTree(ifoUri, baseDocumentId + ext);
+                DocumentFile companion = DocumentFile.fromSingleUri(context, candidate);
+                if (companion != null && companion.exists()) {
+                    return candidate;
                 }
             }
             return null;
