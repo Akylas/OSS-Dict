@@ -2,8 +2,12 @@ package itkach.aard2.article;
 
 import android.database.DataSetObserver;
 
+import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import itkach.aard2.dictionary.DictionaryEntry;
 import itkach.aard2.lookup.LookupResult;
@@ -16,10 +20,13 @@ class LookupResultWrapper implements BlobListWrapper {
 
     private final LookupResult lookupResult;
     private final ToEntry<DictionaryEntry> toEntry;
+    // The live list is cleared/filled on worker threads: read a copy taken with the adapter notify
+    private List<DictionaryEntry> snapshot;
 
     LookupResultWrapper(@NonNull LookupResult lookupResult, @NonNull ToEntry<DictionaryEntry> toEntry) {
         this.lookupResult = lookupResult;
         this.toEntry = toEntry;
+        this.snapshot = new ArrayList<>(lookupResult.getList());
     }
 
     @Override
@@ -32,21 +39,27 @@ class LookupResultWrapper implements BlobListWrapper {
         lookupResult.unregisterDataSetObserver(observer);
     }
 
+    @MainThread
+    @Override
+    public void refresh() {
+        snapshot = new ArrayList<>(lookupResult.getList());
+    }
+
     @Nullable
     @Override
     public DictionaryEntry get(int index) {
-        return toEntry.convert(lookupResult.getList().get(index));
+        return toEntry.convert(snapshot.get(index));
     }
 
     @Nullable
     @Override
     public CharSequence getLabel(int index) {
-        DictionaryEntry item = lookupResult.getList().get(index);
+        DictionaryEntry item = snapshot.get(index);
         return item != null ? item.key : null;
     }
 
     @Override
     public int size() {
-        return lookupResult.getList().size();
+        return snapshot.size();
     }
 }

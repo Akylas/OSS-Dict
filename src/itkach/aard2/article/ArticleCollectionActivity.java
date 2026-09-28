@@ -208,6 +208,10 @@ public class ArticleCollectionActivity extends AppCompatActivity
     }
 
     private void updateTitle(int position) {
+        // A swipe can report a page from the layout preceding a pending notifyDataSetChanged
+        if (position >= pagerAdapter.getItemCount()) {
+            return;
+        }
         DictionaryEntry entry = pagerAdapter.get(position);
         CharSequence pageTitle = pagerAdapter.getPageTitle(position);
         ActionBar actionBar = requireActionBar();
@@ -403,7 +407,10 @@ public class ArticleCollectionActivity extends AppCompatActivity
         private final DataSetObserver observer = new DataSetObserver() {
             @Override
             public void onChanged() {
-                ThreadUtils.postOnMainThread(() -> notifyDataSetChanged());
+                ThreadUtils.postOnMainThread(() -> {
+                    blobListWrapper.refresh();
+                    notifyDataSetChanged();
+                });
             }
         };
 
