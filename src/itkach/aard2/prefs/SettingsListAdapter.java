@@ -81,6 +81,7 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
     private static final long ID_USER_STYLES          = 502;
     private static final long ID_CLEAR_CACHE          = 503;
     private static final long ID_DISABLE_SWIPE_NAV    = 504;
+    private static final long ID_ALLOW_FULLSCREEN     = 505;
 
     private static final long ID_SORT_BY_RANK         = 601;
     private static final long ID_AUTO_PASTE           = 602;
@@ -287,6 +288,12 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
                 new BoolPref() {
                     @Override public boolean get() { return ArticleViewPrefs.disableSwipeNavigation(); }
                     @Override public void set(boolean v) { ArticleViewPrefs.setDisableSwipeNavigation(v); }
+                }));
+        list.add(new SwitchItem(ID_ALLOW_FULLSCREEN, R.string.setting_allow_fullscreen_title,
+                R.string.setting_allow_fullscreen_subtitle,
+                new BoolPref() {
+                    @Override public boolean get() { return ArticleCollectionPrefs.allowFullscreen(); }
+                    @Override public void set(boolean v) { ArticleCollectionPrefs.setAllowFullscreen(v); }
                 }));
         list.add(new UserStylesItem());
         list.add(new ClearCacheItem());
