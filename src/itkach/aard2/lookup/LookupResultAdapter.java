@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.elevation.SurfaceColors;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import itkach.aard2.R;
@@ -31,7 +32,9 @@ public class LookupResultAdapter extends RecyclerView.Adapter<LookupResultAdapte
         @Override
         public void onChanged() {
             ThreadUtils.postOnMainThread(() -> {
-                list = lookupResult.getList();
+                // Snapshot: the live list is mutated on worker threads, RecyclerView must
+                // only see changes together with notifyDataSetChanged().
+                list = new ArrayList<>(lookupResult.getList());
                 notifyDataSetChanged();
             });
         }
