@@ -1,0 +1,14 @@
+Features:
+- add bookmarks/history backup format
+- merge backup entries into bookmarks and history
+- export and import bookmarks and history
+- add option to disable swipe to change article
+- add launcher shortcut to look up a word
+- allow a user-defined display name per dictionary
+- add a rename action to the dictionary list
+- add Lingvo DSL dictionary support
+- add option to disallow article full screen
+
+Bug fixes:
+- detect blocked internet permission and keep app usable
+- keep Parcelable CREATO
