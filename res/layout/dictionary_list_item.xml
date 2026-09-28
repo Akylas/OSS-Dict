@@ -85,6 +85,29 @@
                 tools:text="100,000 items" />
 
             <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/dictionary_original_label_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="2dp">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    app:srcCompat="@drawable/ic_edit" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/dictionary_original_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:textAppearance="?attr/textAppearanceListItemSecondary"
+                    tools:text="Original: Wikipedia (en)" />
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
                 android:id="@+id/dictionary_copyright_row"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -202,6 +225,16 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:id="@+id/dictionary_btn_toggle_detail_space" />
+
+            <com.google.android.material.button.MaterialButton
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/dictionary_btn_rename"
+                android:layout_gravity="end"
+                android:contentDescription="@string/action_rename"
+                app:iconGravity="textStart"
+                app:icon="@drawable/ic_edit" />
 
             <com.google.android.material.button.MaterialButton
                 style="@style/Widget.Material3.Button.IconButton"
