@@ -20,6 +20,7 @@ import java.util.Map;
 
 import itkach.aard2.dictionary.Dictionary;
 import itkach.aard2.dictionary.SlobDictionary;
+import itkach.aard2.dictionary.dsl.DslDictionary;
 import itkach.aard2.dictionary.mdict.MDictDictionary;
 import itkach.aard2.dictionary.stardict.StarDictDictionary;
 import itkach.aard2.slob.SlobTags;
@@ -32,7 +33,7 @@ public class SlobDescriptor extends BaseDescriptor {
 
     /**
      * Dictionary format identifier. One of: {@code "slob"}, {@code "mdict"},
-     * {@code "stardict"}.  Defaults to {@code "slob"} so that existing
+     * {@code "stardict"}, {@code "stardict-archive"}, {@code "dsl"}.  Defaults to {@code "slob"} so that existing
      * persisted descriptors continue to work without migration.
      */
     @JsonProperty("format")
@@ -42,6 +43,7 @@ public class SlobDescriptor extends BaseDescriptor {
     public static final String FORMAT_MDICT    = "mdict";
     public static final String FORMAT_STARDICT = "stardict";
     public static final String FORMAT_STARDICT_ARCHIVE = "stardict-archive";
+    public static final String FORMAT_DSL      = "dsl";
 
     @JsonProperty("path")
     public String path;
@@ -51,6 +53,15 @@ public class SlobDescriptor extends BaseDescriptor {
      */
     @JsonProperty("mddPath")
     public String mddPath;
+    /** Optional URI of a DSL media archive ({@code .dsl.files.zip}). */
+    @JsonProperty("dslResourcesPath")
+    public String dslResourcesPath;
+    /** Optional URI of a DSL annotation file ({@code .ann}). */
+    @JsonProperty("dslAnnPath")
+    public String dslAnnPath;
+    /** Optional URI of a DSL abbreviation dictionary ({@code _abrv.dsl}). */
+    @JsonProperty("dslAbbrevPath")
+    public String dslAbbrevPath;
 
     @JsonProperty("tags")
     public Map<String, String> tags = new HashMap<>();
@@ -154,6 +165,10 @@ public class SlobDescriptor extends BaseDescriptor {
                 case FORMAT_STARDICT_ARCHIVE:
                     dict = StarDictDictionary.fromArchiveUri(context, uri, path);
                     break;
+                case FORMAT_DSL:
+                    dict = DslDictionary.fromUri(context, uri, path,
+                            dslResourcesPath, dslAnnPath, dslAbbrevPath);
+                    break;
                 case FORMAT_SLOB:
                 default:
                     fileDescriptor = context.getContentResolver().openFileDescriptor(uri, "r");
@@ -200,6 +215,9 @@ public class SlobDescriptor extends BaseDescriptor {
                 if (mddPath != null && !mddPath.isEmpty()) {
                     MDictDictionary.cleanupPersistedData(context, mddPath);
                 }
+                break;
+            case FORMAT_DSL:
+                DslDictionary.cleanupPersistedData(context, path);
                 break;
             default:
                 // FORMAT_SLOB and FORMAT_STARDICT produce no persistent local data.
@@ -269,6 +287,7 @@ public class SlobDescriptor extends BaseDescriptor {
         String lower = path.toLowerCase();
         if (lower.endsWith(".mdx")) return FORMAT_MDICT;
         if (lower.endsWith(".ifo")) return FORMAT_STARDICT;
+        if (lower.endsWith(".dsl") || lower.endsWith(".dsl.gz") || lower.endsWith(".dsl.dz")) return FORMAT_DSL;
         if (lower.endsWith(".zip")) {
             // Could be StarDict archive - we'll try to detect when loading
             return FORMAT_STARDICT_ARCHIVE;

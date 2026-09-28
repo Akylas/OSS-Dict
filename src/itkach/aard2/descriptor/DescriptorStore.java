@@ -90,6 +90,9 @@ public class DescriptorStore<T extends BaseDescriptor> {
                 d.format = (format == null || format.isEmpty()) ? SlobDescriptor.FORMAT_SLOB : format;
                 d.path = getText(root, "path");
                 d.mddPath = getText(root, "mddPath");
+                d.dslResourcesPath = getText(root, "dslResourcesPath");
+                d.dslAnnPath = getText(root, "dslAnnPath");
+                d.dslAbbrevPath = getText(root, "dslAbbrevPath");
                 JsonNode tagsNode = root.get("tags");
                 if (tagsNode != null && tagsNode.isObject()) {
                     Iterator<Map.Entry<String, JsonNode>> fields = tagsNode.fields();
@@ -180,6 +183,9 @@ public class DescriptorStore<T extends BaseDescriptor> {
                 root.put("format", d.format);
                 root.put("path", d.path);
                 root.put("mddPath", d.mddPath);
+                root.put("dslResourcesPath", d.dslResourcesPath);
+                root.put("dslAnnPath", d.dslAnnPath);
+                root.put("dslAbbrevPath", d.dslAbbrevPath);
                 root.set("tags", mapper.valueToTree(d.tags));
                 root.put("active", d.active);
                 root.put("priority", d.priority);

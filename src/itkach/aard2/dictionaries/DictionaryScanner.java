@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -89,6 +90,7 @@ public class DictionaryScanner {
         DETECTORS.add(new MDictFormatDetector());
         DETECTORS.add(new StarDictFormatDetector());
         DETECTORS.add(new StarDictArchiveFormatDetector());
+        DETECTORS.add(new DslFormatDetector());
     }
 
     /**
@@ -283,13 +285,81 @@ public class DictionaryScanner {
     }
 
     /**
+     * Detector for DSL dictionaries (.dsl, .dsl.gz, .dsl.dz) with optional
+     * companions: media archive (.dsl.files.zip or .files.zip), annotation
+     * (.ann) and abbreviations (_abrv.dsl[.gz|.dz]).
+     */
+    private static class DslFormatDetector implements FormatDetector {
+        private static final String[] EXTENSIONS = {".dsl", ".dsl.gz", ".dsl.dz"};
+
+        @Nullable
+        private static String baseName(@NonNull String name) {
+            String lower = name.toLowerCase(Locale.ROOT);
+            for (String extension : EXTENSIONS) {
+                if (lower.endsWith(extension)) return name.substring(0, name.length() - extension.length());
+            }
+            return null;
+        }
+
+        @Override
+        public boolean canHandle(@NonNull DocumentFile file) {
+            String name = file.getName();
+            if (name == null) return false;
+            String base = baseName(name);
+            // Abbreviation files are companions, not dictionaries.
+            return base != null && !base.toLowerCase(Locale.ROOT).endsWith("_abrv");
+        }
+
+        @Override
+        @Nullable
+        public DictionaryFileSet buildFileSet(@NonNull Context context, @NonNull DocumentFile folder,
+                                               @NonNull DocumentFile file, @NonNull Set<String> processedNames) {
+            String name = file.getName();
+            if (name == null) return null;
+            String base = baseName(name);
+            if (base == null) return null;
+            String baseLower = base.toLowerCase(Locale.ROOT);
+
+            List<DocumentFile> files = new ArrayList<>();
+            files.add(file);
+            DocumentFile[] folderFiles = folder.listFiles();
+            if (folderFiles != null) {
+                for (DocumentFile f : folderFiles) {
+                    if (f == null || !f.isFile()) continue;
+                    String fn = f.getName();
+                    if (fn == null) continue;
+                    String fnLower = fn.toLowerCase(Locale.ROOT);
+                    if (fnLower.equals(baseLower + ".dsl.files.zip")
+                            || fnLower.equals(baseLower + ".files.zip")
+                            || fnLower.equals(baseLower + ".ann")
+                            || fnLower.equals(baseLower + "_abrv.dsl")
+                            || fnLower.equals(baseLower + "_abrv.dsl.gz")
+                            || fnLower.equals(baseLower + "_abrv.dsl.dz")) {
+                        files.add(f);
+                    }
+                }
+            }
+            String id = file.getUri().toString();
+            return new DictionaryFileSet(id, SlobDescriptor.FORMAT_DSL, file, files, true);
+        }
+
+        @Override
+        @NonNull
+        public String getFormat() {
+            return SlobDescriptor.FORMAT_DSL;
+        }
+    }
+
+    /**
      * Detector for StarDict .zip archives.
      */
     private static class StarDictArchiveFormatDetector implements FormatDetector {
         @Override
         public boolean canHandle(@NonNull DocumentFile file) {
             String name = file.getName();
-            return name != null && name.toLowerCase().endsWith(".zip");
+            // "<name>.files.zip" is a DSL media archive, not a StarDict archive.
+            return name != null && name.toLowerCase().endsWith(".zip")
+                    && !name.toLowerCase().endsWith(".files.zip");
         }
 
         @Override
