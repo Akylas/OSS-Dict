@@ -256,6 +256,22 @@ public class DictionaryFolderManager {
                 }
             }
 
+            // For DSL, attach the companion files collected by the scanner
+            if (SlobDescriptor.FORMAT_DSL.equals(fileSet.format)) {
+                for (DocumentFile f : fileSet.files) {
+                    String fn = f.getName();
+                    if (fn == null || f == fileSet.mainFile) continue;
+                    String fnLower = fn.toLowerCase(java.util.Locale.ROOT);
+                    if (fnLower.endsWith(".files.zip")) {
+                        descriptor.dslResourcesPath = f.getUri().toString();
+                    } else if (fnLower.endsWith(".ann")) {
+                        descriptor.dslAnnPath = f.getUri().toString();
+                    } else if (fnLower.contains("_abrv.dsl")) {
+                        descriptor.dslAbbrevPath = f.getUri().toString();
+                    }
+                }
+            }
+
             descriptor.loadDictionary(context);
 
             // Check if dictionary with this ID already exists

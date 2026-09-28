@@ -38,6 +38,9 @@
     java.lang.String format;
     java.lang.String path;
     java.lang.String mddPath;
+    java.lang.String dslResourcesPath;
+    java.lang.String dslAnnPath;
+    java.lang.String dslAbbrevPath;
     java.util.Map tags;
     boolean active;
     long priority;

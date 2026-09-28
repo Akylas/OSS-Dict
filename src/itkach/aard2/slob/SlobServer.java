@@ -37,6 +37,7 @@ import itkach.aard2.dictionary.Dictionary;
 import itkach.aard2.dictionary.DictionaryContent;
 import itkach.aard2.dictionary.DictionaryEntry;
 import itkach.aard2.dictionary.SlobDictionary;
+import itkach.aard2.dictionary.dsl.DslDictionary;
 import itkach.aard2.dictionary.mdict.MDictDictionary;
 import itkach.slob.Slob;
 
@@ -208,7 +209,8 @@ public class SlobServer extends Thread {
         Dictionary dict = slobHelper.getDictionary(dictIdOrUri);
         if (dict != null) {
             String blobId = uri.getQueryParameter("blob");
-            if (blobId == null && (dict instanceof MDictDictionary && !key.toString().startsWith("entry://"))) {
+            if (blobId == null && ((dict instanceof MDictDictionary && !key.toString().startsWith("entry://"))
+                    || (dict instanceof DslDictionary && key.indexOf(".") > 0))) {
                 blobId = key.toString();
             }
             if (blobId != null) {
