@@ -73,6 +73,19 @@ public class ArticleCollectionActivity extends AppCompatActivity
     private ViewPager2 viewPager;
     private ArticleCollectionViewModel viewModel;
     private boolean isHistory;
+    // KEYCODE_BACK is not dispatched on Android 16+ (predictive back), only enabled while the web view can go back
+    private final OnBackPressedCallback webViewBackCallback = new OnBackPressedCallback(false) {
+        @Override
+        public void handleOnBackPressed() {
+            ArticleWebView webView = getCurrentWebView();
+            if (webView != null && webView.canGoBack()) {
+                webView.goBack();
+            } else {
+                setEnabled(false);
+                getOnBackPressedDispatcher().onBackPressed();
+            }
+        }
+    };
     // onBackPressed() is not called on Android 16+ (predictive back), only enabled while fullscreen
     private final OnBackPressedCallback exitFullscreenCallback = new OnBackPressedCallback(false) {
         @Override
@@ -86,6 +99,8 @@ public class ArticleCollectionActivity extends AppCompatActivity
         EdgeToEdge.enable(this);
         savedInstanceState = Utils.sanitizeSavedState(savedInstanceState, getClassLoader());
         super.onCreate(savedInstanceState);
+        // Registered first: callbacks added later (e.g. exiting fullscreen) take priority
+        getOnBackPressedDispatcher().addCallback(this, webViewBackCallback);
         Utils.updateNightMode();
         setContentView(R.layout.activity_article_collection_loading);
         setSupportActionBar(findViewById(R.id.toolbar));
@@ -143,6 +158,7 @@ public class ArticleCollectionActivity extends AppCompatActivity
                             fragment.applyTextZoomPref();
                         });
                     }
+                    updateWebViewBackCallback();
 
                 }
             });
@@ -200,6 +216,20 @@ public class ArticleCollectionActivity extends AppCompatActivity
             v.setLayoutParams(mlp);
             return WindowInsetsCompat.CONSUMED;
         });
+    }
+
+    @Nullable
+    private ArticleWebView getCurrentWebView() {
+        if (pagerAdapter == null || viewPager == null) {
+            return null;
+        }
+        ArticleFragment fragment = pagerAdapter.getPageFragment(viewPager.getCurrentItem());
+        return fragment != null ? fragment.getWebView() : null;
+    }
+
+    void updateWebViewBackCallback() {
+        ArticleWebView webView = getCurrentWebView();
+        webViewBackCallback.setEnabled(webView != null && webView.canGoBack());
     }
 
     @NonNull
@@ -325,13 +355,6 @@ public class ArticleCollectionActivity extends AppCompatActivity
         if (af != null) {
             ArticleWebView webView = af.getWebView();
             if (webView != null) {
-                if (keyCode == KeyEvent.KEYCODE_BACK) {
-                    if (webView.canGoBack()) {
-                        webView.goBack();
-                        return true;
-                    }
-                }
-
                 if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
                     if (!AppPrefs.useVolumeKeysForNavigation()) {
                         return false;
