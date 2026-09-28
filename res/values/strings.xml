@@ -69,7 +69,10 @@
     <string translatable="false" name="main_empty_dictionaries_download_url">https://github.com/itkach/slob/wiki/Dictionaries</string>
     <string name="main_empty_dictionaries_formats" translatable="false" >
         <![CDATA[
-<b>.slob</b> (Aard/slob), <b>.mdx</b> (MDict), <b>.zip</b>(StarDict .ifo/.dict/.idx), <b>.dsl</b>/<b>.dsl.gz</b>/<b>.dsl.dz</b> (Lingvo DSL)
+<b>.slob</b> (Aard/slob)<br/>
+<b>.mdx</b> (MDict)<br/>
+<b>.zip</b> (StarDict .ifo/.dict/.idx)<br/>
+<b>.dsl</b>/<b>.dsl.gz</b>/<b>.dsl.dz</b> (Lingvo DSL)
  ]]>
 </string>
     <string translatable="false" name="main_empty_dictionaries_template"><![CDATA[

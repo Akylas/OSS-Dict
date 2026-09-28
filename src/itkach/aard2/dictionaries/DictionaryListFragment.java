@@ -11,7 +11,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -19,6 +18,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -167,18 +167,15 @@ public class DictionaryListFragment extends BaseListFragment {
                 selectFolderButton.setOnClickListener(v -> selectDictionaryFolder());
                 
                 // Add some margin and center the button
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                // (container is a LinearLayoutCompat, which does not extend LinearLayout)
+                LinearLayoutCompat.LayoutParams params = new LinearLayoutCompat.LayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT
                 );
                 params.topMargin = (int) (24 * getResources().getDisplayMetrics().density);
+                params.gravity = Gravity.CENTER_HORIZONTAL;
                 selectFolderButton.setLayoutParams(params);
-                
-                // Center the button by setting gravity on the parent if it's a LinearLayout
-                if (containerGroup instanceof LinearLayout) {
-                    ((LinearLayout) containerGroup).setGravity(Gravity.CENTER_HORIZONTAL);
-                }
-                
+
                 containerGroup.addView(selectFolderButton);
             }
         }
