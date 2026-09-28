@@ -86,6 +86,9 @@ public class ArticleWebView extends SearchableWebView {
 
     private boolean forceLoadRemoteContent;
 
+    @Nullable
+    private Runnable onHistoryChangedListener;
+
     @JavascriptInterface
     public void setStyleTitles(String[] titles) {
         Log.d(TAG, String.format("Got %d style titles", titles.length));
@@ -178,6 +181,10 @@ public class ArticleWebView extends SearchableWebView {
 
     public void setForceLoadRemoteContent(boolean forceLoadRemoteContent) {
         this.forceLoadRemoteContent = forceLoadRemoteContent;
+    }
+
+    public void setOnHistoryChangedListener(@Nullable Runnable onHistoryChangedListener) {
+        this.onHistoryChangedListener = onHistoryChangedListener;
     }
 
     private boolean allowRemoteContent() {
@@ -470,6 +477,14 @@ public class ArticleWebView extends SearchableWebView {
             view.loadUrl("javascript:" + StyleJsUtils.getStyleSwitcherJs() + ";$SLOB.setStyleTitles($styleSwitcher.getTitles())");
             applyStylePref();
             view.setVisibility(WebView.VISIBLE);
+        }
+
+        @Override
+        public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
+            super.doUpdateVisitedHistory(view, url, isReload);
+            if (onHistoryChangedListener != null) {
+                onHistoryChangedListener.run();
+            }
         }
 
         @Nullable

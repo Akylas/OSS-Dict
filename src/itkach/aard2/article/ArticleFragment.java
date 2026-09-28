@@ -155,6 +155,11 @@ public class ArticleFragment extends Fragment {
             webView.setBackgroundColor(MaterialColors.getColor(webView, com.google.android.material.R.attr.colorSurface));
         }
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        webView.setOnHistoryChangedListener(() -> {
+            if (getActivity() instanceof ArticleCollectionActivity) {
+                ((ArticleCollectionActivity) getActivity()).updateWebViewBackCallback();
+            }
+        });
         webView.restoreState(savedInstanceState);
         webView.loadUrl(url.toString());
         webView.setWebChromeClient(new WebChromeClient() {
