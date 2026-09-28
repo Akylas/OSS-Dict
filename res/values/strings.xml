@@ -188,6 +188,8 @@
     <string name="setting_disable_javascript_subtitle">Disabling JavaScript has unintended side effects such as applying custom styles and loading remote contents.</string>
     <string name="setting_disable_swipe_navigation_title">Disable swipe to change article</string>
     <string name="setting_disable_swipe_navigation_subtitle">Keeps horizontal swipes for scrolling wide content. Articles can still be changed from the tabs.</string>
+    <string name="setting_allow_fullscreen_title">Allow full screen</string>
+    <string name="setting_allow_fullscreen_subtitle">Show the full screen button in articles. When off, articles always keep the status and navigation bars.</string>
     <string name="specified_number_of_items_selected">%d selected</string>
     <string name="action_open_random_article">Random article</string>
     <string name="setting_disable_history">Disable history</string>
