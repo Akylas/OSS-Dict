@@ -154,9 +154,12 @@ dependencies {
 
     implementation 'com.github.Akylas:jspeex:1.0.0'
 
-    api 'com.fasterxml.jackson.core:jackson-databind:2.21.2'
-    api 'com.fasterxml.jackson.core:jackson-core:2.21.2'
-    api 'com.fasterxml.jackson.core:jackson-annotations:2.21'
+    // Jackson 2.14+ requires Android API 26 (references java.lang.BootstrapMethodError)
+    // and crashes at startup on API 24/25 — see #113. Do not bump past 2.13.x
+    // while minSdk < 26.
+    api('com.fasterxml.jackson.core:jackson-databind') { version { strictly '2.13.5' } }
+    api('com.fasterxml.jackson.core:jackson-core') { version { strictly '2.13.5' } }
+    api('com.fasterxml.jackson.core:jackson-annotations') { version { strictly '2.13.5' } }
 
     testImplementation 'junit:junit:4.13.2'
     implementation 'junit:junit:4.13.2'
