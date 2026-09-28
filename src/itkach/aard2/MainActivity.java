@@ -331,20 +331,6 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         super.onDestroy();
     }
 
-    @Override
-    public void onBackPressed() {
-        int currentItem = viewPager.getCurrentItem();
-        Fragment frag = appSectionsPagerAdapter.getItem(currentItem);
-        if (frag instanceof BlobDescriptorListFragment) {
-            BlobDescriptorListFragment bdFrag = (BlobDescriptorListFragment) frag;
-            if (bdFrag.isFilterExpanded()) {
-                bdFrag.collapseFilter();
-                return;
-            }
-        }
-        super.onBackPressed();
-    }
-
     public void displayFab(@DrawableRes int icon, @StringRes int description, View.OnClickListener listener) {
         fab.setImageResource(icon);
         fab.setContentDescription(getString(description));

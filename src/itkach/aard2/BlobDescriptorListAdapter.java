@@ -116,7 +116,7 @@ public class BlobDescriptorListAdapter extends RecyclerView.Adapter<BlobDescript
         CharSequence timestamp = DateUtils.getRelativeTimeSpanString(item.createdAt);
         Context context = holder.itemView.getContext();
         holder.titleView.setText(item.key);
-        holder.sourceView.setText(dict == null ? "???" : dict.getLabel());
+        holder.sourceView.setText(SlobHelper.getInstance().getDisplayLabel(dict));
         holder.dateView.setText(timestamp);
         holder.cardView.setChecked(checkStates.get(position, false));
         holder.cardView.setOnLongClickListener(v -> {

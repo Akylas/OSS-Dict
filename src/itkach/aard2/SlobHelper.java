@@ -438,6 +438,19 @@ public final class SlobHelper {
         }
     }
 
+    /**
+     * Returns the name to display for a dictionary: the user-defined name from
+     * its descriptor when set, the dictionary's own label otherwise.
+     */
+    @NonNull
+    public String getDisplayLabel(@Nullable Dictionary dict) {
+        if (dict == null) {
+            return "???";
+        }
+        SlobDescriptor descriptor = dictionaries.getById(dict.getId());
+        return descriptor != null ? descriptor.getLabel() : dict.getLabel();
+    }
+
     @Nullable
     public Dictionary findDictionary(@NonNull String dictIdOrUri) {
         checkInitialized();

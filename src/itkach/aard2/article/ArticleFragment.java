@@ -25,6 +25,7 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 import itkach.aard2.R;
 import itkach.aard2.SlobHelper;
 import itkach.aard2.prefs.AppPrefs;
+import itkach.aard2.prefs.ArticleCollectionPrefs;
 import itkach.aard2.prefs.ArticleViewPrefs;
 import itkach.aard2.utils.Utils;
 import itkach.aard2.widget.ArticleWebView;
@@ -52,6 +53,9 @@ public class ArticleFragment extends Fragment {
         bookmarkMenu = menu.findItem(R.id.action_bookmark_article);
         if (AppPrefs.disableBookmarks()) {
             bookmarkMenu.setVisible(false);
+        }
+        if (!ArticleCollectionPrefs.allowFullscreen()) {
+            menu.findItem(R.id.action_fullscreen).setVisible(false);
         }
         stylesMenu = menu.findItem(R.id.action_select_style);
     }

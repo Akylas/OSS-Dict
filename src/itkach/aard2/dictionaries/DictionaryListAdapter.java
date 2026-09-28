@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,6 +38,7 @@ public class DictionaryListAdapter extends RecyclerView.Adapter<DictionaryListAd
     private final DictionaryListFragment fragment;
     private final View.OnClickListener openUrlOnClick;
     private AlertDialog deleteConfirmationDialog;
+    private AlertDialog renameDialog;
 
     private final static String hrefTemplate = "<a href='%1$s'>%2$s</a>";
 
@@ -105,6 +107,7 @@ public class DictionaryListAdapter extends RecyclerView.Adapter<DictionaryListAd
         holder.sourceView.setOnClickListener(openUrlOnClick);
         holder.forgetBtn.setOnClickListener(v -> forget(context, position));
         holder.updateBtn.setOnClickListener(v -> fragment.updateDictionary(desc));
+        holder.renameBtn.setOnClickListener(v -> rename(context, position));
 
         // Enable/disable dictionary
         holder.activeSwitch.setChecked(desc.active);
@@ -127,16 +130,24 @@ public class DictionaryListAdapter extends RecyclerView.Adapter<DictionaryListAd
         holder.blobCountView.setVisibility(desc.error == null ? View.VISIBLE : View.GONE);
         holder.blobCountView.setText(context.getResources().getQuantityString(R.plurals.dict_item_count,
                 (int) blobCount, blobCount));
-        // 3. Copyright
+        // 3. Original label, only meaningful once the dictionary has been renamed
+        boolean renamed = !TextUtils.isEmpty(desc.displayName);
+        holder.originalLabelContainer.setVisibility(renamed ? View.VISIBLE : View.GONE);
+        holder.originalLabelContainer.setEnabled(available);
+        if (renamed) {
+            holder.originalLabelView.setText(
+                    context.getString(R.string.dictionaries_original_label, desc.getOriginalLabel()));
+        }
+        // 4. Copyright
         String copyright = desc.tags.get(SlobTags.TAG_COPYRIGHT);
         holder.copyrightView.setText(copyright);
         holder.copyrightContainer.setVisibility(TextUtils.isEmpty(copyright) ? View.GONE : View.VISIBLE);
         holder.copyrightContainer.setEnabled(available);
-        // 4. License
+        // 5. License
         setupLicenseView(desc, available, holder);
-        // 5. Source
+        // 6. Source
         setupSourceView(desc, available, holder);
-        // 6. Path
+        // 7. Path
         holder.pathView.setText(fileName);
         holder.pathContainer.setEnabled(available);
 
@@ -201,6 +212,48 @@ public class DictionaryListAdapter extends RecyclerView.Adapter<DictionaryListAd
         licenseRow.setEnabled(available);
     }
 
+    /**
+     * Asks for a user-defined display name for the dictionary at {@code position}.
+     * An empty name (or the Reset button) restores the dictionary's own label.
+     * The dialog is modal, so the list cannot be reordered from the UI while it is
+     * open, but it can still change under a background folder scan.
+     */
+    private void rename(Context context, int position) {
+        SlobDescriptor desc = data.get(position);
+        if (desc == null) {
+            return;
+        }
+        View content = LayoutInflater.from(context).inflate(R.layout.dialog_rename_dictionary, null);
+        EditText input = content.findViewById(R.id.dictionary_rename_input);
+        input.setText(desc.displayName == null ? "" : desc.displayName);
+        input.setSelection(input.getText().length());
+        renameDialog = new MaterialAlertDialogBuilder(context)
+                .setTitle(R.string.dictionaries_rename_title)
+                .setView(content)
+                .setPositiveButton(R.string.action_save, (dialog, which) -> {
+                    String name = input.getText().toString().trim();
+                    setDisplayName(desc, name.isEmpty() ? null : name);
+                })
+                .setNeutralButton(R.string.action_reset, (dialog, which) -> setDisplayName(desc, null))
+                .setNegativeButton(R.string.action_cancel, null)
+                .create();
+        renameDialog.setOnDismissListener(dialogInterface -> renameDialog = null);
+        renameDialog.show();
+    }
+
+    private void setDisplayName(@NonNull SlobDescriptor desc, @Nullable String displayName) {
+        // A background folder scan can add or remove dictionaries while the dialog is
+        // open, so resolve the position again instead of trusting the bound one.
+        int position = data.indexOf(desc);
+        if (position < 0) {
+            Log.d(TAG, "Dictionary is gone, not renaming: " + desc.path);
+            return;
+        }
+        desc.displayName = displayName;
+        // Persists the descriptor and notifies observers
+        data.set(position, desc);
+    }
+
     private void forget(Context context, int position) {
         SlobDescriptor desc = data.get(position);
         final String label = desc.getLabel();
@@ -254,6 +307,7 @@ public class DictionaryListAdapter extends RecyclerView.Adapter<DictionaryListAd
         public final MaterialButton toggleFavoriteBtn;
         public final MaterialButton updateBtn;
         public final MaterialButton forgetBtn;
+        public final MaterialButton renameBtn;
         public final MaterialTextView titleView;
         public final View errorContainer;
         public final MaterialTextView errorView;
@@ -264,6 +318,8 @@ public class DictionaryListAdapter extends RecyclerView.Adapter<DictionaryListAd
         public final MaterialTextView sourceView;
         public final View copyrightContainer;
         public final MaterialTextView copyrightView;
+        public final View originalLabelContainer;
+        public final MaterialTextView originalLabelView;
         public final View pathContainer;
         public final MaterialTextView pathView;
 
@@ -277,6 +333,7 @@ public class DictionaryListAdapter extends RecyclerView.Adapter<DictionaryListAd
             toggleFavoriteBtn = itemView.findViewById(R.id.dictionary_btn_toggle_fav);
             updateBtn = itemView.findViewById(R.id.dictionary_btn_update);
             forgetBtn = itemView.findViewById(R.id.dictionary_btn_forget);
+            renameBtn = itemView.findViewById(R.id.dictionary_btn_rename);
             titleView = itemView.findViewById(R.id.dictionary_label);
             errorContainer = itemView.findViewById(R.id.dictionary_error_row);
             errorView = itemView.findViewById(R.id.dictionary_error);
@@ -287,6 +344,8 @@ public class DictionaryListAdapter extends RecyclerView.Adapter<DictionaryListAd
             sourceView = itemView.findViewById(R.id.dictionary_source);
             copyrightContainer = itemView.findViewById(R.id.dictionary_copyright_row);
             copyrightView = itemView.findViewById(R.id.dictionary_copyright);
+            originalLabelContainer = itemView.findViewById(R.id.dictionary_original_label_row);
+            originalLabelView = itemView.findViewById(R.id.dictionary_original_label);
             pathContainer = itemView.findViewById(R.id.dictionary_path_row);
             pathView = itemView.findViewById(R.id.dictionary_path);
         }

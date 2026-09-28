@@ -42,6 +42,7 @@
     java.lang.String dslAnnPath;
     java.lang.String dslAbbrevPath;
     java.util.Map tags;
+    java.lang.String displayName;
     boolean active;
     long priority;
     long blobCount;

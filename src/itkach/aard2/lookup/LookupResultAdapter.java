@@ -15,9 +15,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.elevation.SurfaceColors;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import itkach.aard2.R;
+import itkach.aard2.SlobHelper;
 import itkach.aard2.article.ArticleCollectionActivity;
 import itkach.aard2.dictionary.Dictionary;
 import itkach.aard2.dictionary.DictionaryEntry;
@@ -31,7 +33,9 @@ public class LookupResultAdapter extends RecyclerView.Adapter<LookupResultAdapte
         @Override
         public void onChanged() {
             ThreadUtils.postOnMainThread(() -> {
-                list = lookupResult.getList();
+                // Snapshot: the live list is mutated on worker threads, RecyclerView must
+                // only see changes together with notifyDataSetChanged().
+                list = new ArrayList<>(lookupResult.getList());
                 notifyDataSetChanged();
             });
         }
@@ -79,7 +83,7 @@ public class LookupResultAdapter extends RecyclerView.Adapter<LookupResultAdapte
 
         holder.itemView.setVisibility(View.VISIBLE);
         holder.titleView.setText(item.key);
-        holder.sourceView.setText(dict == null ? "???" : dict.getLabel());
+        holder.sourceView.setText(SlobHelper.getInstance().getDisplayLabel(dict));
         holder.cardView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ArticleCollectionActivity.class);
             intent.putExtra("position", position);

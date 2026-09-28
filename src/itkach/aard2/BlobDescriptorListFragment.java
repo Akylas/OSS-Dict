@@ -37,16 +37,6 @@ abstract class BlobDescriptorListFragment extends BaseListFragment implements Ac
 
     private MenuItem miFilter = null;
 
-    public boolean isFilterExpanded() {
-        return miFilter != null && miFilter.isActionViewExpanded();
-    }
-
-    public void collapseFilter() {
-        if (miFilter != null) {
-            miFilter.collapseActionView();
-        }
-    }
-
     abstract BlobDescriptorList getDescriptorList();
 
     abstract String getItemClickAction();

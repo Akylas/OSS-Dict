@@ -17,10 +17,18 @@ public class ArticleCollectionPrefs extends Prefs {
     }
 
     public static boolean isFullscreen() {
-        return getInstance().prefs.getBoolean(PREF_FULLSCREEN, false);
+        return allowFullscreen() && getInstance().prefs.getBoolean(PREF_FULLSCREEN, false);
     }
 
     public static void setFullscreen(boolean fullscreen) {
         getInstance().prefs.edit().putBoolean(PREF_FULLSCREEN, fullscreen).apply();
+    }
+
+    public static boolean allowFullscreen() {
+        return getInstance().prefs.getBoolean("allow_fullscreen", true);
+    }
+
+    public static void setAllowFullscreen(boolean allowFullscreen) {
+        getInstance().prefs.edit().putBoolean("allow_fullscreen", allowFullscreen).apply();
     }
 }
