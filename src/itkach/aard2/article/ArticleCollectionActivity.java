@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -72,6 +73,13 @@ public class ArticleCollectionActivity extends AppCompatActivity
     private ViewPager2 viewPager;
     private ArticleCollectionViewModel viewModel;
     private boolean isHistory;
+    // onBackPressed() is not called on Android 16+ (predictive back), only enabled while fullscreen
+    private final OnBackPressedCallback exitFullscreenCallback = new OnBackPressedCallback(false) {
+        @Override
+        public void handleOnBackPressed() {
+            toggleFullScreen();
+        }
+    };
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -82,6 +90,7 @@ public class ArticleCollectionActivity extends AppCompatActivity
         setContentView(R.layout.activity_article_collection_loading);
         setSupportActionBar(findViewById(R.id.toolbar));
         viewModel = new ViewModelProvider(this).get(ArticleCollectionViewModel.class);
+        getOnBackPressedDispatcher().addCallback(this, exitFullscreenCallback);
 
         final ActionBar actionBar = requireActionBar();
         actionBar.hide();
@@ -101,6 +110,8 @@ public class ArticleCollectionActivity extends AppCompatActivity
             setContentView(R.layout.activity_article_collection);
             setSupportActionBar(findViewById(R.id.toolbar));
             requireActionBar().setDisplayHomeAsUpEnabled(true);
+            // The new toolbar is created after onResume() applied the pref
+            applyFullScreenPref();
 
             TabLayout tabs = findViewById(R.id.tabs);
             tabs.setVisibility(
@@ -191,16 +202,6 @@ public class ArticleCollectionActivity extends AppCompatActivity
         });
     }
 
-    @Override
-    public void onBackPressed() {
-        if (ArticleCollectionPrefs.isFullscreen()) {
-            // Exit fullscreen
-            toggleFullScreen();
-            return;
-        }
-        super.onBackPressed();
-    }
-
     @NonNull
     public ActionBar requireActionBar() {
         return Objects.requireNonNull(getSupportActionBar());
@@ -232,6 +233,7 @@ public class ArticleCollectionActivity extends AppCompatActivity
     }
 
     private void applyFullScreenPref() {
+        exitFullscreenCallback.setEnabled(ArticleCollectionPrefs.isFullscreen());
         if (ArticleCollectionPrefs.isFullscreen()) {
             WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(getWindow(),
                     getWindow().getDecorView());
