@@ -65,8 +65,21 @@
     </string>
     <string name="main_empty_dictionaries_title">No dictionaries are open</string>
     <string name="main_empty_dictionaries_subtitle">OSS-Dict supports the following formats</string>
-    <string name="main_empty_dictionaries_download_text">You can find links for dictionaries</string>
-    <string translatable="false" name="main_empty_dictionaries_download_url">https://github.com/itkach/slob/wiki/Dictionaries</string>
+    <string name="action_get_dictionaries">Get dictionaries</string>
+    <string-array name="dictionary_source_names" translatable="false">
+        <item>slob wiki (.slob)</item>
+        <item>FreeMdict cloud (MDict, StarDict, DSL…)</item>
+        <item>FreeMdict forum (MDict)</item>
+        <item>huzheng.org (StarDict)</item>
+        <item>open-dsl-dict (DSL)</item>
+    </string-array>
+    <string-array name="dictionary_source_urls" translatable="false">
+        <item>https://github.com/itkach/slob/wiki/Dictionaries</item>
+        <item>https://cloud.freemdict.com/index.php/s/pgKcDcbSDTCzXCs</item>
+        <item>https://forum.freemdict.com/t/topic/23143</item>
+        <item>http://download.huzheng.org/</item>
+        <item>https://github.com/open-dsl-dict</item>
+    </string-array>
     <string name="main_empty_dictionaries_formats" translatable="false" >
         <![CDATA[
 <b>.slob</b> (Aard/slob)<br/>
@@ -78,11 +91,9 @@
     <string translatable="false" name="main_empty_dictionaries_template"><![CDATA[
     <b>%1$s</b><br/><br/>
     <small>
-    %2$s:<br/>%3$s<br/><br/>
-    %4$s <a href="%5$s">%6$s</a>
+    %2$s:<br/>%3$s
     </small>
 ]]></string>
-    <string name="here">here</string>
     <string name="application_version">Version %1$s</string>
     <string name="setting_clear_cache">Clear Cache</string>
     <string name="setting_clear_cache_subtitle">Delete cached content including remote images</string>
