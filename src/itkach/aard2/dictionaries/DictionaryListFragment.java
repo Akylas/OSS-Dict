@@ -8,6 +8,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -27,6 +30,7 @@ import androidx.core.text.HtmlCompat;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
 import itkach.aard2.BaseListFragment;
@@ -135,10 +139,7 @@ public class DictionaryListFragment extends BaseListFragment {
         String html = getString(R.string.main_empty_dictionaries_template,
                 getString(R.string.main_empty_dictionaries_title),
                 getString(R.string.main_empty_dictionaries_subtitle),
-                getString(R.string.main_empty_dictionaries_formats),
-                getString(R.string.main_empty_dictionaries_download_text),
-                getString(R.string.main_empty_dictionaries_download_url),
-                getString(R.string.here)
+                getString(R.string.main_empty_dictionaries_formats)
         );
 
         Spanned sp = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY);
@@ -177,6 +178,24 @@ public class DictionaryListFragment extends BaseListFragment {
                 selectFolderButton.setLayoutParams(params);
 
                 containerGroup.addView(selectFolderButton);
+            }
+
+            // Add a button listing where to download dictionaries
+            if (emptyView.findViewWithTag("get_dictionaries_button") == null) {
+                MaterialButton getDictionariesButton = new MaterialButton(requireContext());
+                getDictionariesButton.setText(R.string.action_get_dictionaries);
+                getDictionariesButton.setTag("get_dictionaries_button");
+                getDictionariesButton.setOnClickListener(v -> showDictionarySources());
+
+                LinearLayoutCompat.LayoutParams params = new LinearLayoutCompat.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                );
+                params.topMargin = (int) (8 * getResources().getDisplayMetrics().density);
+                params.gravity = Gravity.CENTER_HORIZONTAL;
+                getDictionariesButton.setLayoutParams(params);
+
+                containerGroup.addView(getDictionariesButton);
             }
         }
 
@@ -260,6 +279,37 @@ public class DictionaryListFragment extends BaseListFragment {
             ((MainActivity) activity).hideFab();
         }
         super.onPause();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.dictionary_list, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem mi) {
+        if (mi.getItemId() == R.id.action_get_dictionaries) {
+            showDictionarySources();
+            return true;
+        }
+        return super.onOptionsItemSelected(mi);
+    }
+
+    private void showDictionarySources() {
+        String[] urls = getResources().getStringArray(R.array.dictionary_source_urls);
+        new MaterialAlertDialogBuilder(requireActivity())
+                .setTitle(R.string.action_get_dictionaries)
+                .setItems(R.array.dictionary_source_names, (dialog, which) -> openUrl(urls[which]))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void openUrl(String url) {
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+        } catch (ActivityNotFoundException e) {
+            Log.d(TAG, "No browser available", e);
+        }
     }
 
     private void selectDictionaryFiles() {
