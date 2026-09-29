@@ -8,6 +8,8 @@
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="false">127.0.0.1</domain>
         <domain includeSubdomains="false">localhost</domain>
+        <!-- StarDict dictionaries source, served over http only -->
+        <domain includeSubdomains="true">huzheng.org</domain>
         <domain includeSubdomains="true">upload.wikimedia.org</domain>
         <domain includeSubdomains="true">commons.wikimedia.org</domain>
         <domain includeSubdomains="true">wikimedia.org</domain>

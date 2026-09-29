@@ -102,6 +102,19 @@
 {wikipedia_activities}
         </activity>
 
+        <activity
+            android:name=".dictionaries.DictionaryBrowserActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
+            android:exported="false" />
+
+        <receiver
+            android:name=".dictionaries.DictionaryDownloadReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
+            </intent-filter>
+        </receiver>
+
         <uses-library
             android:required="false"
             android:name="com.sec.android.app.multiwindow" />

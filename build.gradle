@@ -154,6 +154,12 @@ dependencies {
 
     implementation 'com.github.Akylas:jspeex:1.0.0'
 
+    // Extracts downloaded dictionary archives (.7z, .tar.*). 1.26+ requires commons-io,
+    // built on java.nio.file (API 26+). The CVEs left in 1.25 affect DUMP and Pack200 only,
+    // which are never parsed. xz provides LZMA for 7z and .tar.xz.
+    implementation 'org.apache.commons:commons-compress:1.25.0'
+    implementation 'org.tukaani:xz:1.12'
+
     // Jackson 2.14+ requires Android API 26 (references java.lang.BootstrapMethodError)
     // and crashes at startup on API 24/25 — see #113. Do not bump past 2.13.x
     // while minSdk < 26.

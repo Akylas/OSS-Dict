@@ -275,6 +275,8 @@ public class DictionaryListAdapter extends RecyclerView.Adapter<DictionaryListAd
                             Log.w(TAG, "Failed to clean up persisted data for "
                                     + desc.path, e);
                         }
+                        // Otherwise the next app storage sync adds it back
+                        DictionaryDownloader.deleteAppStorageFiles(appCtx, desc);
                     });
                 })
                 .setNegativeButton(R.string.action_no, null)

@@ -99,13 +99,27 @@ public class DictionaryScanner {
     @WorkerThread
     @NonNull
     public static ScanResult scanFolder(@NonNull Context context, @NonNull Uri folderUri) {
+        DocumentFile folder = DocumentFile.fromTreeUri(context, folderUri);
+        if (folder == null) {
+            Log.w(TAG, "Invalid folder URI: " + folderUri);
+            return new ScanResult(new ArrayList<>(), new HashSet<>());
+        }
+        return scanFolder(context, folder);
+    }
+
+    /**
+     * Scans the given folder for dictionaries. Also accepts a plain directory wrapped with
+     * {@link DocumentFile#fromFile}.
+     */
+    @WorkerThread
+    @NonNull
+    public static ScanResult scanFolder(@NonNull Context context, @NonNull DocumentFile folder) {
         List<DictionaryFileSet> dictionaries = new ArrayList<>();
         Set<String> foundIds = new HashSet<>();
         Set<String> processedFileNames = new HashSet<>();
 
-        DocumentFile folder = DocumentFile.fromTreeUri(context, folderUri);
-        if (folder == null || !folder.isDirectory()) {
-            Log.w(TAG, "Invalid folder URI: " + folderUri);
+        if (!folder.isDirectory()) {
+            Log.w(TAG, "Invalid folder: " + folder.getUri());
             return new ScanResult(dictionaries, foundIds);
         }
 

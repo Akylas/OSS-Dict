@@ -69,6 +69,19 @@
     <string name="main_empty_dictionaries_download_text" tools:ignore="UnusedResources">You can find links for dictionaries</string>
     <string name="here" tools:ignore="UnusedResources">here</string>
     <string name="action_get_dictionaries">Get dictionaries</string>
+    <string name="action_open_in_browser">Open in browser</string>
+    <string name="action_reload">Reload</string>
+    <string name="action_download_and_add">Download and add</string>
+    <string name="dictionary_download_title">Add dictionary?</string>
+    <string name="dictionary_download_message_folder">%1$s will be downloaded into your dictionary folder and added to the app.</string>
+    <string name="dictionary_download_message_app_storage">%1$s will be downloaded into app storage and added to the app. It is deleted when you remove the dictionary.</string>
+    <string name="dictionary_download_size">Size: %1$s</string>
+    <string name="dictionary_download_unsupported_title">Unsupported file</string>
+    <string name="dictionary_download_unsupported_message">%1$s is not a dictionary format OSS-Dict can add directly. You can download it with your browser instead.</string>
+    <string name="msg_dictionary_download_started">Downloading %1$s…</string>
+    <string name="msg_dictionary_download_failed">Failed to download %1$s</string>
+    <string name="msg_dictionary_extract_failed">Failed to extract %1$s</string>
+    <string name="msg_dictionary_archive_empty">No dictionary found in %1$s</string>
     <string-array name="dictionary_source_names" translatable="false">
         <item>slob wiki (.slob)</item>
         <item>FreeMdict cloud (MDict, StarDict, DSL…)</item>

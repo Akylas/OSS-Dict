@@ -2,6 +2,7 @@ package itkach.aard2.dictionaries;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.UriPermission;
 import android.net.Uri;
 import android.util.Log;
 
@@ -10,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.documentfile.provider.DocumentFile;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -90,7 +92,7 @@ public class DictionaryFolderManager {
 
         try {
             DictionaryScanner.ScanResult scanResult = DictionaryScanner.scanFolder(context, folderUri);
-            boolean changed = syncDictionaries(scanResult, progressCallback);
+            boolean changed = syncDictionaries(scanResult, folderUriStr, progressCallback);
             return changed;
         } finally {
             if (loadingCallback != null) {
@@ -100,23 +102,41 @@ public class DictionaryFolderManager {
     }
 
     /**
-     * Synchronizes the dictionary list based on scan results.
-     * Handles additions, removals, and broken dictionary detection.
+     * Scans the app-private folder holding dictionaries downloaded from the in-app browser
+     * (used when no writable auto-load folder is set) and synchronizes dictionaries.
+     * Should be called on a background thread.
+     *
+     * @return true if any changes were made
      */
     @WorkerThread
-    private boolean syncDictionaries(@NonNull DictionaryScanner.ScanResult scanResult) {
-        return syncDictionaries(scanResult, null);
+    public synchronized boolean syncAppDownloads(@Nullable ProgressCallback progressCallback) {
+        File folder = DictionaryDownloader.getAppDictionariesDir(context);
+        if (folder == null) {
+            return false;
+        }
+        if (progressCallback != null) {
+            ThreadUtils.postOnMainThread(progressCallback::onScanStarted);
+        }
+        DictionaryScanner.ScanResult scanResult = DictionaryScanner.scanFolder(context,
+                DocumentFile.fromFile(folder));
+        // Trailing slash so a sibling folder sharing the name prefix is not matched
+        String folderPrefix = Uri.fromFile(folder) + "/";
+        return syncDictionaries(scanResult, folderPrefix, progressCallback);
     }
-    
+
     /**
      * Synchronizes the dictionary list based on scan results with progress updates.
      * Handles additions, removals, and broken dictionary detection.
      *
      * <p>Uses path-based lookup into the persistent {@code dictionaries} list so that
      * already-loaded dictionaries are never re-opened and re-parsed on app restart.</p>
+     *
+     * @param folderUriStr the scanned folder: dictionaries within it that are no longer
+     *                     present are removed
      */
     @WorkerThread
-    private boolean syncDictionaries(@NonNull DictionaryScanner.ScanResult scanResult, 
+    private boolean syncDictionaries(@NonNull DictionaryScanner.ScanResult scanResult,
+                                     @NonNull String folderUriStr,
                                      @Nullable ProgressCallback progressCallback) {
         boolean changed = false;
         int addedCount = 0;
@@ -165,9 +185,16 @@ public class DictionaryFolderManager {
                     existing.error = null;
                     existing.active = true;
                     existing.expandDetail = false;
+                    applyCompanions(existing, fileSet);
                     existing.loadDictionary(context);
                     dictionaries.notifyChanged();
                     Log.d(TAG, "Repaired dictionary: " + existing.getLabel());
+                    changed = true;
+                } else if (applyCompanions(existing, fileSet)) {
+                    // A companion file (.mdd, DSL resources…) arrived after the main file
+                    existing.loadDictionary(context);
+                    dictionaries.notifyChanged();
+                    Log.d(TAG, "Attached companion files to dictionary: " + existing.getLabel());
                     changed = true;
                 }
                 // else: already loaded and healthy – nothing to do
@@ -185,7 +212,6 @@ public class DictionaryFolderManager {
         }
 
         // Remove dictionaries that belonged to this folder but are no longer present
-        String folderUriStr = AppPrefs.getAutoLoadDictFolderUri();
         if (!folderUriStr.isEmpty()) {
             List<SlobDescriptor> toRemove = new ArrayList<>();
             for (int i = 0; i < dictionaries.size(); i++) {
@@ -244,33 +270,7 @@ public class DictionaryFolderManager {
             SlobDescriptor descriptor = new SlobDescriptor();
             descriptor.path = uri.toString();
             descriptor.format = fileSet.format;
-
-            // For MDict, find the first companion .mdd file (if any) from the file set
-            if (SlobDescriptor.FORMAT_MDICT.equals(fileSet.format)) {
-                for (DocumentFile f : fileSet.files) {
-                    String fn = f.getName();
-                    if (fn != null && fn.toLowerCase(java.util.Locale.ROOT).endsWith(".mdd")) {
-                        descriptor.mddPath = f.getUri().toString();
-                        break;
-                    }
-                }
-            }
-
-            // For DSL, attach the companion files collected by the scanner
-            if (SlobDescriptor.FORMAT_DSL.equals(fileSet.format)) {
-                for (DocumentFile f : fileSet.files) {
-                    String fn = f.getName();
-                    if (fn == null || f == fileSet.mainFile) continue;
-                    String fnLower = fn.toLowerCase(java.util.Locale.ROOT);
-                    if (fnLower.endsWith(".files.zip")) {
-                        descriptor.dslResourcesPath = f.getUri().toString();
-                    } else if (fnLower.endsWith(".ann")) {
-                        descriptor.dslAnnPath = f.getUri().toString();
-                    } else if (fnLower.contains("_abrv.dsl")) {
-                        descriptor.dslAbbrevPath = f.getUri().toString();
-                    }
-                }
-            }
+            applyCompanions(descriptor, fileSet);
 
             descriptor.loadDictionary(context);
 
@@ -288,6 +288,55 @@ public class DictionaryFolderManager {
             Log.e(TAG, "Failed to add dictionary: " + fileSet.mainFile.getUri(), e);
             return null;
         }
+    }
+
+    /**
+     * Records on the descriptor the companion files (MDict .mdd, DSL resources, annotation
+     * and abbreviations) collected by the scanner that it does not reference yet.
+     * @return true if the descriptor changed
+     */
+    private static boolean applyCompanions(@NonNull SlobDescriptor descriptor,
+                                           @NonNull DictionaryScanner.DictionaryFileSet fileSet) {
+        boolean changed = false;
+
+        // For MDict, find the first companion .mdd file (if any) from the file set
+        if (SlobDescriptor.FORMAT_MDICT.equals(fileSet.format) && descriptor.mddPath == null) {
+            for (DocumentFile f : fileSet.files) {
+                String fn = f.getName();
+                if (fn != null && fn.toLowerCase(java.util.Locale.ROOT).endsWith(".mdd")) {
+                    descriptor.mddPath = f.getUri().toString();
+                    changed = true;
+                    break;
+                }
+            }
+        }
+
+        // For DSL, attach the companion files collected by the scanner
+        if (SlobDescriptor.FORMAT_DSL.equals(fileSet.format)) {
+            for (DocumentFile f : fileSet.files) {
+                String fn = f.getName();
+                if (fn == null || f == fileSet.mainFile) continue;
+                String fnLower = fn.toLowerCase(java.util.Locale.ROOT);
+                String companionPath = f.getUri().toString();
+                if (fnLower.endsWith(".files.zip")) {
+                    if (descriptor.dslResourcesPath == null) {
+                        descriptor.dslResourcesPath = companionPath;
+                        changed = true;
+                    }
+                } else if (fnLower.endsWith(".ann")) {
+                    if (descriptor.dslAnnPath == null) {
+                        descriptor.dslAnnPath = companionPath;
+                        changed = true;
+                    }
+                } else if (fnLower.contains("_abrv.dsl")) {
+                    if (descriptor.dslAbbrevPath == null) {
+                        descriptor.dslAbbrevPath = companionPath;
+                        changed = true;
+                    }
+                }
+            }
+        }
+        return changed;
     }
 
     /**
@@ -340,17 +389,19 @@ public class DictionaryFolderManager {
                 // Release old folder permission if exists
                 String oldFolderUri = AppPrefs.getAutoLoadDictFolderUri();
                 if (!oldFolderUri.isEmpty()) {
-                    try {
-                        context.getContentResolver().releasePersistableUriPermission(
-                                Uri.parse(oldFolderUri), Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    } catch (Exception e) {
-                        Log.w(TAG, "Failed to release old folder permission: " + oldFolderUri, e);
-                    }
+                    releaseFolderPermission(Uri.parse(oldFolderUri));
                 }
-                
-                // Take persistable URI permission for the new folder
-                context.getContentResolver().takePersistableUriPermission(folderUri,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                // Take persistable URI permission for the new folder. Write access lets
+                // dictionaries downloaded in the app be saved there; not every picker grants it.
+                try {
+                    context.getContentResolver().takePersistableUriPermission(folderUri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                } catch (SecurityException e) {
+                    Log.d(TAG, "No write access to folder, taking read access only: " + folderUri);
+                    context.getContentResolver().takePersistableUriPermission(folderUri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                }
                 
                 // Save the folder URI
                 AppPrefs.setAutoLoadDictFolderUri(folderUri.toString());
@@ -379,12 +430,7 @@ public class DictionaryFolderManager {
                 // Release folder permission
                 String folderUri = AppPrefs.getAutoLoadDictFolderUri();
                 if (!folderUri.isEmpty()) {
-                    try {
-                        context.getContentResolver().releasePersistableUriPermission(
-                                Uri.parse(folderUri), Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    } catch (Exception e) {
-                        Log.w(TAG, "Failed to release folder permission: " + folderUri, e);
-                    }
+                    releaseFolderPermission(Uri.parse(folderUri));
                 }
                 
                 // Clear the preference
@@ -399,6 +445,43 @@ public class DictionaryFolderManager {
         });
     }
     
+    /**
+     * Releases the persisted read and, if held, write permission on the folder.
+     */
+    private void releaseFolderPermission(@NonNull Uri folderUri) {
+        int flags = Intent.FLAG_GRANT_READ_URI_PERMISSION;
+        if (hasWritePermission(folderUri)) {
+            flags |= Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+        }
+        try {
+            context.getContentResolver().releasePersistableUriPermission(folderUri, flags);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to release folder permission: " + folderUri, e);
+        }
+    }
+
+    /**
+     * Returns the auto-load folder if one is set and the app may write into it.
+     */
+    @Nullable
+    public Uri getWritableAutoLoadFolder() {
+        String folderUriStr = AppPrefs.getAutoLoadDictFolderUri();
+        if (folderUriStr.isEmpty()) {
+            return null;
+        }
+        Uri folderUri = Uri.parse(folderUriStr);
+        return hasWritePermission(folderUri) ? folderUri : null;
+    }
+
+    private boolean hasWritePermission(@NonNull Uri folderUri) {
+        for (UriPermission permission : context.getContentResolver().getPersistedUriPermissions()) {
+            if (folderUri.equals(permission.getUri()) && permission.isWritePermission()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Removes all dictionaries that were auto-loaded from the folder.
      * This method checks each dictionary's path to determine if it's within the library folder,

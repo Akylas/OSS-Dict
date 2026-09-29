@@ -4,6 +4,10 @@ import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import itkach.aard2.SlobHelper;
 import itkach.aard2.utils.ThreadUtils;
 
@@ -149,6 +153,30 @@ public class AppPrefs extends Prefs {
     
     public static void setAutoMoveToFolder(boolean autoMove) {
         getInstance().prefs.edit().putBoolean(PREF_AUTO_MOVE_TO_FOLDER, autoMove).apply();
+    }
+
+    private static final String PREF_PENDING_DICTIONARY_DOWNLOADS = "pendingDictionaryDownloads";
+
+    /** Adds a {@code DownloadManager} id of a dictionary download awaiting installation. */
+    public static synchronized void addPendingDictionaryDownload(long downloadId) {
+        Set<String> ids = new HashSet<>(getInstance().prefs.getStringSet(PREF_PENDING_DICTIONARY_DOWNLOADS,
+                Collections.emptySet()));
+        ids.add(String.valueOf(downloadId));
+        getInstance().prefs.edit().putStringSet(PREF_PENDING_DICTIONARY_DOWNLOADS, ids).apply();
+    }
+
+    /**
+     * Removes a pending dictionary download id.
+     * @return true if the id was pending
+     */
+    public static synchronized boolean removePendingDictionaryDownload(long downloadId) {
+        Set<String> ids = new HashSet<>(getInstance().prefs.getStringSet(PREF_PENDING_DICTIONARY_DOWNLOADS,
+                Collections.emptySet()));
+        if (!ids.remove(String.valueOf(downloadId))) {
+            return false;
+        }
+        getInstance().prefs.edit().putStringSet(PREF_PENDING_DICTIONARY_DOWNLOADS, ids).apply();
+        return true;
     }
 
     private static final String PREF_SORT_LOOKUP_BY_RANK = "sortLookupByRank";
