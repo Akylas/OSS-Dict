@@ -299,17 +299,10 @@ public class DictionaryListFragment extends BaseListFragment {
         String[] urls = getResources().getStringArray(R.array.dictionary_source_urls);
         new MaterialAlertDialogBuilder(requireActivity())
                 .setTitle(R.string.action_get_dictionaries)
-                .setItems(R.array.dictionary_source_names, (dialog, which) -> openUrl(urls[which]))
+                .setItems(R.array.dictionary_source_names, (dialog, which) ->
+                        startActivity(DictionaryBrowserActivity.createIntent(requireContext(), urls[which])))
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
-    }
-
-    private void openUrl(String url) {
-        try {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-        } catch (ActivityNotFoundException e) {
-            Log.d(TAG, "No browser available", e);
-        }
     }
 
     private void selectDictionaryFiles() {
@@ -334,7 +327,8 @@ public class DictionaryListFragment extends BaseListFragment {
 
     public void selectDictionaryFolder() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         try {
             folderSelector.launch(intent);
         } catch (ActivityNotFoundException e) {

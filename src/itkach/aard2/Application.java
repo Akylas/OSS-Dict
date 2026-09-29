@@ -80,6 +80,8 @@ public class Application extends android.app.Application {
             if (!folderUri.isEmpty()) {
                 DictionaryFolderManager.getInstance(this).scanAndSync(null);
             }
+            // Picks up dictionaries downloaded in the app whose install was interrupted
+            DictionaryFolderManager.getInstance(this).syncAppDownloads(null);
         });
     }
 
