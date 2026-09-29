@@ -43,6 +43,7 @@ OSS-Dict supports different dictionary formats:
 
 * slob: slob-files. [Read here](https://github.com/itkach/slob) about slob. You can get dictionaries from https://github.com/itkach/slob/wiki/Dictionaries
 * MDict: you get dictionaries from https://forum.freemdict.com/t/topic/23143
+* Large collection (MDict, StarDict, DSL…): https://cloud.freemdict.com/index.php/s/pgKcDcbSDTCzXCs
 * StarDict/GoldenDict: you can get dictionaries from http://download.huzheng.org/
 * DSL (ABBYY Lingvo, `.dsl`, `.dsl.gz`, `.dsl.dz`): add the folder to also pick up `<name>.dsl.files.zip` media, `<name>.ann` and `<name>_abrv.dsl`. You can get dictionaries from https://github.com/open-dsl-dict
 
