@@ -90,15 +90,9 @@
     </plurals>
     <string name="action_ascending">由低到高</string>
     <string name="action_descending">由高到低</string>
-    <string name="formats_supported_header">支持的文件格式：.slob, .mdx, .zip(Stardict, GoldenDict)</string>
+    <string name="formats_supported_header">支持的文件格式：slob, .mdx, .zip (Stardict, GoldenDict), .dsl, .dsl.gz, .dsl.dz (Lingvo DSL)</string>
     <string name="here">这里</string>
-    <string name="main_empty_dictionaries_details"><![CDATA[
-        <b>没有打开的词典</b><br/><br/>
-        <small>
-        OSS-Dict支持的文件格式： <b>.slob</b> (Aard/slob), <b>.mdx</b> (MDict), <b>StarDict</b> as <b>.zip</b> archives containing .ifo/.dict/.idx.<br/><br/>
-        您可以从这个wiki页面下载成品词典： <a href="https://github.com/itkach/slob/wiki/Dictionaries">Dictionaries (slob repo)</a> 或从OSS-Dict的发布页面和社区仓库。
-        </small>
-        ]]></string>
+    <string name="main_empty_dictionaries_details"><![CDATA[<b>没有打开的词典</b><br/><br/>\n \u0020 \u0020 \u0020 \u0020<small>\n \u0020 \u0020 \u0020 \u0020OSS-Dict支持下列文件格式： <b>.slob</b> (Aard/slob), <b>.mdx</b> (MDict), <b>StarDict</b> as <b>.zip</b> archives containing .ifo/.dict/.idx, <b>.dsl</b>/<b>.dsl.gz</b>/<b>.dsl.dz</b> (Lingvo DSL).<br/><br/>\n \u0020 \u0020 \u0020 \u0020您可以从这个wiki页面下载成品词典： <a href="https://github.com/itkach/slob/wiki/Dictionaries">Dictionaries (slob repo)</a> 或从OSS-Dict的发布页面和社区仓库。\n \u0020 \u0020 \u0020 \u0020</small>]]></string>
     <string name="main_empty_dictionaries_title">没有打开的词典</string>
     <string name="main_empty_dictionaries_subtitle">OSS-Dict支持的文件格式</string>
     <string name="dictionaries_scanning_device">从设备扫描词典…</string>
@@ -147,4 +141,41 @@
     <string name="settings_section_lookup">查询</string>
     <string name="settings_section_features">功能</string>
     <string name="setting_about_source">源代码</string>
+    <string name="shortcut_lookup_short_label">查询</string>
+    <string name="shortcut_lookup_long_label">查询单词</string>
+    <string name="action_get_dictionaries">获取词典</string>
+    <string name="action_open_in_browser">在浏览器中打开</string>
+    <string name="action_reload">重新加载</string>
+    <string name="action_download_and_add">下载并添加</string>
+    <string name="dictionary_download_title">添加词典？</string>
+    <string name="dictionary_download_message_folder">将下载 %1$s 到你的词典文件夹并添加到应用中。</string>
+    <string name="dictionary_download_message_app_storage">将下载 %1$s 到应用存储并添加到应用中。删除词典时将删除它。</string>
+    <string name="dictionary_download_size">大小：%1$s</string>
+    <string name="dictionary_download_unsupported_title">不支持的文件</string>
+    <string name="dictionary_download_unsupported_message">%1$s 不是 OSS-Dict 能直接添加的词典格式。你可以用浏览器下载它。</string>
+    <string name="msg_dictionary_download_started">正在下载 %1$s…</string>
+    <string name="msg_dictionary_download_failed">未能下载 %1$s</string>
+    <string name="msg_dictionary_extract_failed">解压 %1$s 失败</string>
+    <string name="msg_dictionary_archive_empty">在 %1$s 中没找到词典</string>
+    <string name="dictionaries_rename_title">重命名词典</string>
+    <string name="dictionaries_rename_hint">显示名称</string>
+    <string name="dictionaries_original_label">原始：%1$s</string>
+    <string name="action_rename">重命名</string>
+    <string name="action_save">保存</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_reset">重置</string>
+    <string name="setting_disable_swipe_navigation_title">禁用滑动更改文章</string>
+    <string name="setting_disable_swipe_navigation_subtitle">保留滚动大宽度内容的水平手势。仍能从标签页更改文章。</string>
+    <string name="setting_allow_fullscreen_title">允许全屏</string>
+    <string name="setting_allow_fullscreen_subtitle">在文章中显示全屏按钮。关闭时，文章始终保留状态和导航条。</string>
+    <string name="article_internet_permission_required">无法显示该文章：内部套接字通信需要联网权限。请在设备设置中启用它。</string>
+    <string name="settings_section_backup">备份</string>
+    <string name="setting_backup">书签和历史</string>
+    <string name="setting_backup_subtitle">保存到一个文件来移动它们到别的设备。导入保留你已经拥有的内容。</string>
+    <string name="action_export">导出</string>
+    <string name="action_import">导入</string>
+    <string name="msg_backup_exported">导出了 %1$d 个书签、%2$d 个历史条目</string>
+    <string name="msg_backup_imported">导入了 %1$d 个书签、%2$d 个历史条目</string>
+    <string name="msg_backup_export_failed">写入备份文件失败</string>
+    <string name="msg_backup_import_failed">不是有效的备份文件</string>
 </resources>
