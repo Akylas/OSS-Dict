@@ -73,6 +73,16 @@ selection mode, tap items to be removed, tap Trash Can icon and
 confirm. A bookmark can also be removed by tapping Bookmark icon
 when viewing article.
 
+### Bookmark Folders and Notes
+
+A bookmark can be filed under any number of folders and carry a
+note. "Folders & note" in the article toolbar edits them, and a
+bookmarked article shows them in a bar at the bottom. In Bookmarks
+tab, the row above the list picks the folder to show; the button at
+its end lists the folders top to bottom, with a search from eight
+folders on. A long tap on a folder renames or deletes it, keeping its
+bookmarks. Folders and notes are part of the backup file.
+
 ### Dictionary Management
 
 Dictionaries are added by selecting dictionary files using

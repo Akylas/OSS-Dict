@@ -52,7 +52,7 @@ public class BlobDescriptorBackupTest {
 
     private byte[] write(List<BlobDescriptor> bookmarks, List<BlobDescriptor> history) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        BlobDescriptorBackup.write(out, mapper, bookmarks, history, EXPORTED_AT);
+        BlobDescriptorBackup.write(out, mapper, bookmarks, history, Collections.emptyList(), EXPORTED_AT);
         return out.toByteArray();
     }
 
@@ -87,6 +87,45 @@ public class BlobDescriptorBackupTest {
         BlobDescriptor readVisited = content.history.get(0);
         assertEquals("world", readVisited.key);
         assertNull("null fragment must stay null", readVisited.fragment);
+    }
+
+    @Test
+    public void roundTripKeepsFoldersAndNote() throws IOException {
+        BlobDescriptor bookmark = descriptor("bookmark-1", "dict-a", "blob-1", "hello", null);
+        bookmark.folders = new ArrayList<>(Arrays.asList("Greetings", "Week 1"));
+        bookmark.note = "Said when meeting someone.\nSecond line.";
+
+        byte[] backup = write(Collections.singletonList(bookmark), Collections.emptyList());
+        BlobDescriptor read = BlobDescriptorBackup.read(new ByteArrayInputStream(backup), mapper)
+                .bookmarks.get(0);
+
+        assertEquals(Arrays.asList("Greetings", "Week 1"), read.folders);
+        assertEquals("Said when meeting someone.\nSecond line.", read.note);
+    }
+
+    @Test
+    public void roundTripKeepsFolderNamesIncludingEmptyFolders() throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        BlobDescriptorBackup.write(out, mapper, Collections.emptyList(), Collections.emptyList(),
+                Arrays.asList("Greetings", "Not used yet"), EXPORTED_AT);
+
+        BlobDescriptorBackup.Content content =
+                BlobDescriptorBackup.read(new ByteArrayInputStream(out.toByteArray()), mapper);
+
+        assertEquals(Arrays.asList("Greetings", "Not used yet"), content.folders);
+    }
+
+    @Test
+    public void readsBackupWrittenBeforeFoldersAndNotesExisted() throws IOException {
+        String json = "{\"format\":\"" + BlobDescriptorBackup.FORMAT + "\",\"version\":1,"
+                + "\"bookmarks\":[{\"id\":\"a\",\"slobId\":\"dict-a\",\"key\":\"hello\"}],"
+                + "\"history\":[]}";
+
+        BlobDescriptorBackup.Content content = BlobDescriptorBackup.read(stream(json), mapper);
+
+        assertTrue(content.folders.isEmpty());
+        assertTrue(content.bookmarks.get(0).folders.isEmpty());
+        assertNull(content.bookmarks.get(0).note);
     }
 
     @Test
@@ -230,6 +269,51 @@ public class BlobDescriptorBackupTest {
         assertEquals(1, accepted.size());
         assertNotNull(accepted.get(0).id);
         assertFalse(accepted.get(0).id.isEmpty());
+    }
+
+    @Test
+    public void mergeAnnotationsAddsFoldersAndNoteToEntryAlreadyPresent() {
+        BlobDescriptor stored = descriptor("existing-1", "dict-a", "blob-1", "hello", null);
+        stored.folders = new ArrayList<>(Collections.singletonList("Greetings"));
+        BlobDescriptor imported = descriptor("imported-1", "dict-a", "blob-1", "hello", null);
+        imported.folders = new ArrayList<>(Arrays.asList("Week 1", "Greetings"));
+        imported.note = "From the other phone";
+
+        List<BlobDescriptor> changed = BlobDescriptorBackup.mergeAnnotations(
+                Collections.singletonList(stored), Collections.singletonList(imported));
+
+        assertEquals(Collections.singletonList(stored), changed);
+        assertEquals(Arrays.asList("Greetings", "Week 1"), stored.folders);
+        assertEquals("From the other phone", stored.note);
+    }
+
+    @Test
+    public void mergeAnnotationsKeepsTheNoteAlreadyStored() {
+        BlobDescriptor stored = descriptor("existing-1", "dict-a", "blob-1", "hello", null);
+        stored.note = "Mine";
+        BlobDescriptor imported = descriptor("imported-1", "dict-a", "blob-1", "hello", null);
+        imported.note = "Theirs";
+
+        List<BlobDescriptor> changed = BlobDescriptorBackup.mergeAnnotations(
+                Collections.singletonList(stored), Collections.singletonList(imported));
+
+        assertTrue(changed.isEmpty());
+        assertEquals("Mine", stored.note);
+    }
+
+    @Test
+    public void mergeAnnotationsIgnoresEntriesThatAreNew() {
+        BlobDescriptor stored = descriptor("existing-1", "dict-a", "blob-1", "hello", null);
+        BlobDescriptor imported = descriptor("imported-1", "dict-a", "blob-9", "goodbye", null);
+        imported.folders = new ArrayList<>(Collections.singletonList("Greetings"));
+        imported.note = "Belongs to another word";
+
+        List<BlobDescriptor> changed = BlobDescriptorBackup.mergeAnnotations(
+                Collections.singletonList(stored), Collections.singletonList(imported));
+
+        assertTrue(changed.isEmpty());
+        assertTrue(stored.folders.isEmpty());
+        assertNull(stored.note);
     }
 
     @Test

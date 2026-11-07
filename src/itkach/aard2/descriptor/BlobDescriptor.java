@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -65,6 +66,13 @@ public class BlobDescriptor extends BaseDescriptor {
 
     @JsonProperty("fragment")
     public String fragment;
+
+    // Replaced on every change, never edited in place: a backup may be reading it on another thread
+    @JsonProperty("folders")
+    public List<String> folders = new ArrayList<>();
+
+    @JsonProperty("note")
+    public String note;
 
     @Nullable
     public static BlobDescriptor fromUri(@NonNull Uri uri) {

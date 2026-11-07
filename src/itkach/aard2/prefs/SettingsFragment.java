@@ -34,6 +34,7 @@ import itkach.aard2.MainActivity;
 import itkach.aard2.R;
 import itkach.aard2.SlobHelper;
 import itkach.aard2.descriptor.BlobDescriptorBackup;
+import itkach.aard2.descriptor.BookmarkFolders;
 import itkach.aard2.dictionaries.DictionaryFolderManager;
 import itkach.aard2.utils.ThreadUtils;
 import itkach.aard2.utils.Utils;
@@ -280,6 +281,8 @@ public class SettingsFragment extends Fragment {
                 return;
             }
             ThreadUtils.postOnMainThread(() -> {
+                BookmarkFolderPrefs.addAll(content.folders);
+                BookmarkFolderPrefs.addAll(BookmarkFolders.count(content.bookmarks).keySet());
                 int bookmarksAdded = slobHelper.bookmarks.importDescriptors(content.bookmarks);
                 int historyAdded = slobHelper.history.importDescriptors(content.history);
                 Toast.makeText(appContext, appContext.getString(R.string.msg_backup_imported,

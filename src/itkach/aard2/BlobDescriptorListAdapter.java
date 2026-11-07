@@ -3,6 +3,7 @@ package itkach.aard2;
 import android.content.Context;
 import android.content.Intent;
 import android.database.DataSetObserver;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -118,6 +119,12 @@ public class BlobDescriptorListAdapter extends RecyclerView.Adapter<BlobDescript
         holder.titleView.setText(item.key);
         holder.sourceView.setText(SlobHelper.getInstance().getDisplayLabel(dict));
         holder.dateView.setText(timestamp);
+        boolean hasFolders = item.folders != null && !item.folders.isEmpty();
+        holder.foldersView.setVisibility(hasFolders ? View.VISIBLE : View.GONE);
+        holder.foldersView.setText(hasFolders ? TextUtils.join(" \u00b7 ", item.folders) : null);
+        boolean hasNote = !TextUtils.isEmpty(item.note);
+        holder.noteView.setVisibility(hasNote ? View.VISIBLE : View.GONE);
+        holder.noteView.setText(hasNote ? item.note : null);
         holder.cardView.setChecked(checkStates.get(position, false));
         holder.cardView.setOnLongClickListener(v -> {
             // Long click only checks an item, no uncheck performed
@@ -169,6 +176,8 @@ public class BlobDescriptorListAdapter extends RecyclerView.Adapter<BlobDescript
         public final TextView titleView;
         public final TextView sourceView;
         public final TextView dateView;
+        public final TextView foldersView;
+        public final TextView noteView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -178,6 +187,8 @@ public class BlobDescriptorListAdapter extends RecyclerView.Adapter<BlobDescript
             titleView = itemView.findViewById(R.id.blob_descriptor_key);
             sourceView = itemView.findViewById(R.id.blob_descriptor_source);
             dateView = itemView.findViewById(R.id.blob_descriptor_timestamp);
+            foldersView = itemView.findViewById(R.id.blob_descriptor_folders);
+            noteView = itemView.findViewById(R.id.blob_descriptor_note);
         }
     }
 }

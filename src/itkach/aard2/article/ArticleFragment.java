@@ -3,6 +3,8 @@ package itkach.aard2.article;
 import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,8 +24,12 @@ import com.google.android.material.color.MaterialColors;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
+import itkach.aard2.BlobDescriptorList;
+import itkach.aard2.BookmarkFolderDialogs;
 import itkach.aard2.R;
 import itkach.aard2.SlobHelper;
+import itkach.aard2.descriptor.BlobDescriptor;
+import itkach.aard2.descriptor.BookmarkFolders;
 import itkach.aard2.prefs.AppPrefs;
 import itkach.aard2.prefs.ArticleCollectionPrefs;
 import itkach.aard2.prefs.ArticleViewPrefs;
@@ -34,10 +40,15 @@ import itkach.aard2.widget.ArticleWebView;
 public class ArticleFragment extends Fragment {
     public static final String ARG_URI = "uri";
 
+    private static final String TAG = ArticleFragment.class.getSimpleName();
+
     private ArticleWebView webView;
     private MenuItem bookmarkMenu;
     private MenuItem stylesMenu;
     private Uri url;
+    private View noteBar;
+    private TextView noteText;
+    private TextView noteFolders;
 
 
     @Override
@@ -53,6 +64,7 @@ public class ArticleFragment extends Fragment {
         bookmarkMenu = menu.findItem(R.id.action_bookmark_article);
         if (AppPrefs.disableBookmarks()) {
             bookmarkMenu.setVisible(false);
+            menu.findItem(R.id.action_bookmark_folders).setVisible(false);
         }
         if (!ArticleCollectionPrefs.allowFullscreen()) {
             menu.findItem(R.id.action_fullscreen).setVisible(false);
@@ -73,6 +85,46 @@ public class ArticleFragment extends Fragment {
         }
     }
 
+    @Nullable
+    private BlobDescriptor findBookmark() {
+        if (url == null || AppPrefs.disableBookmarks()) {
+            return null;
+        }
+        try {
+            return SlobHelper.getInstance().bookmarks.find(url);
+        } catch (IllegalStateException e) {
+            Log.d(TAG, "Bookmarks not available yet", e);
+            return null;
+        }
+    }
+
+    private void refreshBookmarkState() {
+        BlobDescriptor bookmark = findBookmark();
+        displayBookmarked(bookmark != null);
+        if (noteBar == null) {
+            return;
+        }
+        noteBar.setVisibility(bookmark != null ? View.VISIBLE : View.GONE);
+        if (bookmark == null) {
+            return;
+        }
+        boolean hasNote = !TextUtils.isEmpty(bookmark.note);
+        boolean hasFolders = !BookmarkFolders.isUnfiled(bookmark);
+        noteText.setVisibility(hasNote || !hasFolders ? View.VISIBLE : View.GONE);
+        noteText.setText(hasNote ? bookmark.note
+                : noteBar.getContext().getString(R.string.bookmark_add_note_hint));
+        noteText.setAlpha(hasNote ? 1f : 0.7f);
+        noteFolders.setVisibility(hasFolders ? View.VISIBLE : View.GONE);
+        noteFolders.setText(hasFolders ? noteBar.getContext().getString(
+                R.string.bookmark_folders_label, TextUtils.join(", ", bookmark.folders)) : null);
+    }
+
+    private void editFoldersAndNote() {
+        if (url != null) {
+            BookmarkFolderDialogs.editArticle(requireActivity(), url, this::refreshBookmarkState);
+        }
+    }
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
@@ -82,14 +134,31 @@ public class ArticleFragment extends Fragment {
         }
         if (itemId == R.id.action_bookmark_article) {
             if (url != null) {
+                BlobDescriptorList bookmarks = SlobHelper.getInstance().bookmarks;
                 if (item.isChecked()) {
-                    SlobHelper.getInstance().bookmarks.remove(url);
-                    displayBookmarked(false);
+                    BlobDescriptor bookmark = findBookmark();
+                    if (bookmark != null && BookmarkFolders.hasAnnotations(bookmark)) {
+                        new MaterialAlertDialogBuilder(requireActivity())
+                                .setMessage(R.string.bookmark_confirm_remove)
+                                .setPositiveButton(R.string.action_yes, (dialog, which) -> {
+                                    bookmarks.remove(url);
+                                    refreshBookmarkState();
+                                })
+                                .setNegativeButton(R.string.action_no, null)
+                                .show();
+                    } else {
+                        bookmarks.remove(url);
+                        refreshBookmarkState();
+                    }
                 } else {
-                    SlobHelper.getInstance().bookmarks.add(url);
-                    displayBookmarked(true);
+                    bookmarks.add(url);
+                    refreshBookmarkState();
                 }
             }
+            return true;
+        }
+        if (itemId == R.id.action_bookmark_folders) {
+            editFoldersAndNote();
             return true;
         }
         if (itemId == R.id.action_fullscreen) {
@@ -166,6 +235,11 @@ public class ArticleFragment extends Fragment {
         });
         webView.restoreState(savedInstanceState);
         webView.loadUrl(url.toString());
+        noteBar = layout.findViewById(R.id.article_note_bar);
+        noteText = layout.findViewById(R.id.article_note_text);
+        noteFolders = layout.findViewById(R.id.article_note_folders);
+        noteBar.setOnClickListener(view -> editFoldersAndNote());
+        refreshBookmarkState();
         webView.setWebChromeClient(new WebChromeClient() {
             public void onProgressChanged(WebView view, final int newProgress) {
                 final Activity activity = getActivity();
@@ -189,6 +263,15 @@ public class ArticleFragment extends Fragment {
         super.onResume();
         applyTextZoomPref();
         applyStylePref();
+        refreshBookmarkState();
+    }
+
+    @Override
+    public void onDestroyView() {
+        noteBar = null;
+        noteText = null;
+        noteFolders = null;
+        super.onDestroyView();
     }
 
     @Override
@@ -205,6 +288,7 @@ public class ArticleFragment extends Fragment {
                 displayBookmarked(bookmarked);
             } catch (Exception ex) {
                 bookmarkMenu.setVisible(false);
+                menu.findItem(R.id.action_bookmark_folders).setVisible(false);
             }
         }
         applyTextZoomPref();

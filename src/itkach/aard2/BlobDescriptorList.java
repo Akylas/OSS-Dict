@@ -17,14 +17,17 @@ import android.icu.text.StringSearch;
 import java.text.StringCharacterIterator;
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import itkach.aard2.descriptor.BlobDescriptor;
 import itkach.aard2.descriptor.BlobDescriptorBackup;
+import itkach.aard2.descriptor.BookmarkFolders;
 import itkach.aard2.descriptor.DescriptorStore;
 import itkach.aard2.dictionary.Dictionary;
 import itkach.aard2.dictionary.DictionaryEntry;
@@ -40,6 +43,9 @@ public class BlobDescriptorList extends AbstractList<BlobDescriptor> {
         TIME, NAME
     }
 
+    // Never a folder name: names are never empty
+    public static final String FOLDER_UNFILED = "";
+
     protected final DescriptorStore<BlobDescriptor> store;
     protected final List<BlobDescriptor> list;
     private final List<BlobDescriptor> filteredList;
@@ -54,6 +60,10 @@ public class BlobDescriptorList extends AbstractList<BlobDescriptor> {
     private final RuleBasedCollator  filterCollator;
 
     private String filter;
+    @Nullable
+    private volatile String folderFilter;
+    // load() fills the list on a background thread: until then the main thread must not walk it
+    private volatile boolean loadFinished;
     private SortOrder order;
     private boolean ascending;
     private Comparator<BlobDescriptor> comparator;
@@ -107,27 +117,31 @@ public class BlobDescriptorList extends AbstractList<BlobDescriptor> {
      * and any View reflecting the data set should refresh itself.
      */
     @MainThread
-    public void notifyDataSetChanged() {
+    public synchronized void notifyDataSetChanged() {
+        // Synchronized: load() calls this from a background thread
         this.filteredList.clear();
-        if (TextUtils.isEmpty(filter)) {
-            this.filteredList.addAll(this.list);
-        } else {
-            for (BlobDescriptor bd : this.list) {
-                if (bd == null || TextUtils.isEmpty(bd.key)) {
-                    continue;
-                }
-                StringSearch stringSearch = new StringSearch(
-                        filter, new StringCharacterIterator(bd.key), filterCollator);
-                int matchPos = stringSearch.first();
-                if (matchPos != StringSearch.DONE) {
-                    this.filteredList.add(bd);
-                }
+        boolean hasTextFilter = !TextUtils.isEmpty(filter);
+        for (BlobDescriptor bd : this.list) {
+            if (isInShownFolder(bd) && (!hasTextFilter
+                    || (bd != null && (matchesFilter(bd.key) || matchesFilter(bd.note))))) {
+                this.filteredList.add(bd);
             }
         }
         sortOrderChanged();
     }
 
-    private void sortOrderChanged() {
+    private boolean isInShownFolder(@Nullable BlobDescriptor bd) {
+        String folder = folderFilter;
+        return folder == null || (bd != null && (FOLDER_UNFILED.equals(folder)
+                ? BookmarkFolders.isUnfiled(bd) : BookmarkFolders.isIn(bd, folder)));
+    }
+
+    private boolean matchesFilter(@Nullable String text) {
+        return !TextUtils.isEmpty(text) && new StringSearch(filter,
+                new StringCharacterIterator(text), filterCollator).first() != StringSearch.DONE;
+    }
+
+    private synchronized void sortOrderChanged() {
         Utils.sort(this.filteredList, comparator);
         this.dataSetObservable.notifyChanged();
     }
@@ -150,6 +164,7 @@ public class BlobDescriptorList extends AbstractList<BlobDescriptor> {
             }
             this.list.add(bd);
         }
+        loadFinished = true;
         notifyDataSetChanged();
     }
 
@@ -268,12 +283,15 @@ public class BlobDescriptorList extends AbstractList<BlobDescriptor> {
      * Merges descriptors read from a backup file into this list.
      *
      * <p>Nothing is replaced or removed: entries already present are skipped
-     * (see {@link BlobDescriptorBackup#selectNew}).</p>
+     * (see {@link BlobDescriptorBackup#selectNew}), only gaining the backup's folders and note.</p>
      *
      * @return the number of entries actually added
      */
     @MainThread
     public int importDescriptors(@NonNull List<BlobDescriptor> imported) {
+        for (BlobDescriptor bd : BlobDescriptorBackup.mergeAnnotations(this.list, imported)) {
+            store.save(bd);
+        }
         List<BlobDescriptor> added = BlobDescriptorBackup.selectNew(this.list, imported);
         for (BlobDescriptor bd : added) {
             this.list.add(bd);
@@ -315,22 +333,110 @@ public class BlobDescriptorList extends AbstractList<BlobDescriptor> {
     }
 
     public boolean contains(Uri contentUrl) {
+        return find(contentUrl) != null;
+    }
+
+    @Nullable
+    public BlobDescriptor find(Uri contentUrl) {
+        if (!loadFinished) {
+            return null;
+        }
         BlobDescriptor toFind = createDescriptor(contentUrl);
         if (toFind == null) {
-            return false;
+            return null;
         }
         for (BlobDescriptor bd : this.list) {
             if (bd.equals(toFind)) {
                 Log.d(TAG, "Found exact match, bookmarked");
-                return true;
+                return bd;
             }
             if (TextUtils.equals(bd.key, toFind.key) && TextUtils.equals(bd.slobUri, toFind.slobUri)) {
                 Log.d(TAG, "Found approximate match, bookmarked");
-                return true;
+                return bd;
             }
         }
         Log.d(TAG, "not bookmarked");
-        return false;
+        return null;
+    }
+
+    // A null note leaves the notes as they are, a blank one clears them
+    @MainThread
+    public void annotate(@NonNull Collection<BlobDescriptor> targets,
+                         @NonNull Collection<String> addFolders,
+                         @NonNull Collection<String> removeFolders, @Nullable String note) {
+        boolean changed = false;
+        for (BlobDescriptor bd : targets) {
+            boolean foldersChanged = BookmarkFolders.update(bd, addFolders, removeFolders);
+            boolean noteChanged = note != null && BookmarkFolders.setNote(bd, note);
+            if (foldersChanged || noteChanged) {
+                store.save(bd);
+                changed = true;
+            }
+        }
+        if (changed) {
+            notifyDataSetChanged();
+        }
+    }
+
+    @MainThread
+    public void renameFolder(@NonNull String oldName, @NonNull String newName) {
+        for (BlobDescriptor bd : BookmarkFolders.rename(this.list, oldName, newName)) {
+            store.save(bd);
+        }
+        if (oldName.equals(folderFilter)) {
+            folderFilter = newName;
+        }
+        notifyDataSetChanged();
+    }
+
+    @MainThread
+    public void deleteFolder(@NonNull String name) {
+        for (BlobDescriptor bd : BookmarkFolders.remove(this.list, name)) {
+            store.save(bd);
+        }
+        if (name.equals(folderFilter)) {
+            folderFilter = null;
+        }
+        notifyDataSetChanged();
+    }
+
+    @NonNull
+    public Map<String, Integer> getFolderCounts() {
+        return BookmarkFolders.count(loadedEntries());
+    }
+
+    public int getUnfiledCount() {
+        return BookmarkFolders.countUnfiled(loadedEntries());
+    }
+
+    public int getTotalCount() {
+        return loadedEntries().size();
+    }
+
+    @NonNull
+    private List<BlobDescriptor> loadedEntries() {
+        return loadFinished ? this.list : Collections.emptyList();
+    }
+
+    public boolean isLoaded() {
+        return loadFinished;
+    }
+
+    // FOLDER_UNFILED shows the entries in no folder, null shows everything
+    @MainThread
+    public void setFolderFilter(@Nullable String folder) {
+        if (TextUtils.equals(this.folderFilter, folder)) {
+            return;
+        }
+        this.folderFilter = folder;
+        if (loadFinished) {
+            notifyDataSetChanged();
+        }
+    }
+
+    @Nullable
+    public String getFolderFilter() {
+        return this.folderFilter;
     }
 
     public void setFilter(String filter) {
