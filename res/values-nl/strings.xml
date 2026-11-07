@@ -99,7 +99,7 @@
     <string name="permission_internet_required_title">Internettoegang vereist</string>
     <string name="permission_internet_required_message">Deze app vereist internettoegang om correct te functioneren. Hoewel de app niet direct gebruikmaakt van internet, heeft het deze toestemming wel nodig voor interne socketcommunicatie. Schakel de internettoegang in via de instellingen van je apparaat.</string>
     <string name="setting_disable_bottom_nav_labels">Onderste navigatielabels uitschakelen</string>
-    <string name="formats_supported_header">Ondersteunde bestanden: .slob, .mdx, .zip (Stardict, GoldenDict)</string>
+    <string name="formats_supported_header">Ondersteunde bestanden: .slob, .mdx, .zip (Stardict, GoldenDict), .dsl, .dsl.gz, .dsl.dz (Lingvo DSL)</string>
     <string name="main_empty_dictionaries_title">Geen geopende woordenboeken</string>
     <string name="main_empty_dictionaries_subtitle">OSS-Dict ondersteunt de volgende bestanden</string>
     <string name="main_empty_dictionaries_download_text">Je kunt links voor woordenboeken vinden</string>
@@ -108,7 +108,7 @@
     <string name="main_empty_dictionaries_details"><![CDATA[
         <b>Geen geopende woordenboeken</b><br/><br/>
         <small>
-        OSS-Dict ondersteunt de volgende bestanden: <b>.slob</b> (Aard/slob), <b>.mdx</b> (MDict), <b>StarDict</b> als <b>.zip</b> archieven met .ifo/.dict/.idx.<br/><br/>
+        OSS-Dict ondersteunt de volgende bestanden: <b>.slob</b> (Aard/slob), <b>.mdx</b> (MDict), <b>StarDict</b> als <b>.zip</b> archieven met .ifo/.dict/.idx, <b>.dsl</b>/<b>.dsl.gz</b>/<b>.dsl.dz</b> (Lingvo DSL).<br/><br/>
         Je kunt kant-en-klare woordenboeken downloaden van de projectwiki: <a href="https://github.com/itkach/slob/wiki/Dictionaries">Woordenboeken (slob repo)</a> of via de OSS‑Dict-publicaties en gemeenschapsarchieven.
         </small>
         ]]></string>
@@ -152,4 +152,41 @@
     <string name="settings_section_features">Opties</string>
     <string name="setting_about_source">Broncode</string>
     <string name="setting_about_sponsor">Steun op GitHub Sponsors</string>
+    <string name="shortcut_lookup_short_label">Opzoeken</string>
+    <string name="shortcut_lookup_long_label">Woord opzoeken</string>
+    <string name="action_get_dictionaries">Woordenboeken verkrijgen</string>
+    <string name="action_open_in_browser">Openen in browser</string>
+    <string name="action_reload">Herladen</string>
+    <string name="action_download_and_add">Downloaden en toevoegen</string>
+    <string name="dictionary_download_title">Woordenboek toevoegen?</string>
+    <string name="dictionary_download_message_folder">%1$s wordt gedownload naar je woordenboekmap en toegevoegd aan de app.</string>
+    <string name="dictionary_download_message_app_storage">%1$s wordt gedownload naar de app-opslag en toegevoegd aan de app. Het wordt verwijderd wanneer je het woordenboek verwijdert.</string>
+    <string name="dictionary_download_size">Grootte: %1$s</string>
+    <string name="dictionary_download_unsupported_title">Niet ondersteund bestand</string>
+    <string name="dictionary_download_unsupported_message">%1$s is geen bestand die OSS-Dict direct kan toevoegen. Je kunt het in plaats daarvan met je browser downloaden.</string>
+    <string name="msg_dictionary_download_started">%1$s downloaden…</string>
+    <string name="msg_dictionary_download_failed">%1$s downloaden mislukt</string>
+    <string name="msg_dictionary_extract_failed">%1$s uitpakken mislukt</string>
+    <string name="msg_dictionary_archive_empty">Geen woordenboek gevonden in %1$s</string>
+    <string name="dictionaries_rename_title">Woordenboek hernoemen</string>
+    <string name="dictionaries_rename_hint">Weergavenaam</string>
+    <string name="dictionaries_original_label">Origineel: %1$s</string>
+    <string name="action_rename">Hernoemen</string>
+    <string name="action_save">Opslaan</string>
+    <string name="action_cancel">Annuleren</string>
+    <string name="action_reset">Terugzetten</string>
+    <string name="setting_disable_swipe_navigation_title">Vegen om van artikel te wisselen uitschakelen</string>
+    <string name="setting_disable_swipe_navigation_subtitle">Behoud het vegen door brede inhoud. Wisselen tussen artikels kan nog steeds via de tabbladen.</string>
+    <string name="setting_allow_fullscreen_title">Volledig scherm toestaan</string>
+    <string name="setting_allow_fullscreen_subtitle">Knop voor volledig scherm weergeven. Uitgeschakeld behouden artikels altijd de status- en navigatiebalk.</string>
+    <string name="article_internet_permission_required">Dit artikel kan niet worden weergegeven; internettoegang is vereist voor interne socketcommunicatie. Schakel deze in via de apparaatinstellingen.</string>
+    <string name="settings_section_backup">Back-up</string>
+    <string name="setting_backup">Bladwijzers en geschiedenis</string>
+    <string name="setting_backup_subtitle">Opslaan naar een bestand voor het overzetten naar een ander apparaat. Importeren behoud wat je al hebt.</string>
+    <string name="action_export">Exporteren</string>
+    <string name="action_import">Importeren</string>
+    <string name="msg_backup_exported">%1$d bladwijzers en %2$d geschiedenisartikels geëxporteerd</string>
+    <string name="msg_backup_imported">%1$d bladwijzers en %2$d geschiedenisartikels geïmporteerd</string>
+    <string name="msg_backup_export_failed">Back-up maken mislukt</string>
+    <string name="msg_backup_import_failed">Geen geldig back-upbestand</string>
 </resources>
