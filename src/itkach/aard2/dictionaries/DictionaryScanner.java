@@ -20,11 +20,21 @@ import java.util.Set;
 import itkach.aard2.descriptor.SlobDescriptor;
 
 /**
- * Scans a folder for dictionary files and detects changes (additions, removals, breakage).
+ * Scans a folder and its subfolders for dictionary files and detects changes
+ * (additions, removals, breakage).
  * Designed to be extensible for supporting multiple dictionary formats.
  */
 public class DictionaryScanner {
     private static final String TAG = "DictionaryScanner";
+
+    /** Deepest subfolder level scanned below the root. */
+    private static final int MAX_DEPTH = 8;
+
+    /**
+     * Most folders listed in one scan. Bounds the work on huge trees and on loops through
+     * symlinks (the depth cap alone does not bound fan-out).
+     */
+    private static final int MAX_DIRECTORIES = 2000;
 
     /**
      * Represents a dictionary that may consist of multiple files.
@@ -70,9 +80,12 @@ public class DictionaryScanner {
         /**
          * Attempts to build a complete dictionary file set from the given file.
          * Returns null if the file is part of a multi-file dictionary that's already been processed.
+         *
+         * @param folderFiles the entries of the folder holding {@code file}, where companion
+         *                    files are looked up
          */
         @Nullable
-        DictionaryFileSet buildFileSet(@NonNull Context context, @NonNull DocumentFile folder,
+        DictionaryFileSet buildFileSet(@NonNull Context context, @NonNull DocumentFile[] folderFiles,
                                         @NonNull DocumentFile file, @NonNull Set<String> processedNames);
 
         /**
@@ -116,22 +129,50 @@ public class DictionaryScanner {
     public static ScanResult scanFolder(@NonNull Context context, @NonNull DocumentFile folder) {
         List<DictionaryFileSet> dictionaries = new ArrayList<>();
         Set<String> foundIds = new HashSet<>();
-        Set<String> processedFileNames = new HashSet<>();
 
         if (!folder.isDirectory()) {
             Log.w(TAG, "Invalid folder: " + folder.getUri());
             return new ScanResult(dictionaries, foundIds);
         }
 
-        // Get all files in the folder
+        scanDirectory(context, folder, dictionaries, foundIds, new int[]{MAX_DIRECTORIES}, 0);
+        return new ScanResult(dictionaries, foundIds);
+    }
+
+    /**
+     * Scans one directory, then its subdirectories. Companion files are only looked up in the
+     * directory of the main file, and processed names are tracked per directory so that
+     * same-named files in sibling folders do not hide each other.
+     *
+     * @param directoriesLeft single-element counter of folders that may still be listed
+     */
+    @WorkerThread
+    private static void scanDirectory(@NonNull Context context, @NonNull DocumentFile folder,
+                                      @NonNull List<DictionaryFileSet> dictionaries,
+                                      @NonNull Set<String> foundIds,
+                                      @NonNull int[] directoriesLeft, int depth) {
+        if (directoriesLeft[0] <= 0) {
+            Log.w(TAG, "Max folder count reached, not scanning " + folder.getUri());
+            return;
+        }
+        directoriesLeft[0]--;
+
+        // Listed once per folder and shared with the detectors for companion file lookups
         DocumentFile[] files = folder.listFiles();
         if (files == null || files.length == 0) {
-            return new ScanResult(dictionaries, foundIds);
+            return;
         }
+
+        Set<String> processedFileNames = new HashSet<>();
+        List<DocumentFile> subFolders = new ArrayList<>();
 
         // Process each file with appropriate detector
         for (DocumentFile file : files) {
-            if (file == null || !file.isFile()) continue;
+            if (file == null) continue;
+            if (!file.isFile()) {
+                if (file.isDirectory()) subFolders.add(file);
+                continue;
+            }
 
             String name = file.getName();
             if (name == null || processedFileNames.contains(name)) continue;
@@ -139,7 +180,7 @@ public class DictionaryScanner {
             // Try each format detector
             for (FormatDetector detector : DETECTORS) {
                 if (detector.canHandle(file)) {
-                    DictionaryFileSet fileSet = detector.buildFileSet(context, folder, file, processedFileNames);
+                    DictionaryFileSet fileSet = detector.buildFileSet(context, files, file, processedFileNames);
                     if (fileSet != null) {
                         dictionaries.add(fileSet);
                         foundIds.add(fileSet.id);
@@ -154,7 +195,14 @@ public class DictionaryScanner {
             }
         }
 
-        return new ScanResult(dictionaries, foundIds);
+        if (subFolders.isEmpty()) return;
+        if (depth >= MAX_DEPTH) {
+            Log.w(TAG, "Max folder depth reached, not scanning subfolders of " + folder.getUri());
+            return;
+        }
+        for (DocumentFile subFolder : subFolders) {
+            scanDirectory(context, subFolder, dictionaries, foundIds, directoriesLeft, depth + 1);
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -173,7 +221,7 @@ public class DictionaryScanner {
 
         @Override
         @Nullable
-        public DictionaryFileSet buildFileSet(@NonNull Context context, @NonNull DocumentFile folder,
+        public DictionaryFileSet buildFileSet(@NonNull Context context, @NonNull DocumentFile[] folderFiles,
                                                @NonNull DocumentFile file, @NonNull Set<String> processedNames) {
             List<DocumentFile> files = new ArrayList<>();
             files.add(file);
@@ -200,7 +248,7 @@ public class DictionaryScanner {
 
         @Override
         @Nullable
-        public DictionaryFileSet buildFileSet(@NonNull Context context, @NonNull DocumentFile folder,
+        public DictionaryFileSet buildFileSet(@NonNull Context context, @NonNull DocumentFile[] folderFiles,
                                                @NonNull DocumentFile file, @NonNull Set<String> processedNames) {
             List<DocumentFile> files = new ArrayList<>();
             files.add(file);
@@ -209,7 +257,6 @@ public class DictionaryScanner {
             String mdxName = file.getName();
             if (mdxName != null) {
                 String baseName = mdxName.substring(0, mdxName.length() - 4);  // Remove .mdx
-                DocumentFile[] folderFiles = folder.listFiles();
                 if (folderFiles != null) {
                     for (DocumentFile f : folderFiles) {
                         if (f == null || !f.isFile()) continue;
@@ -245,7 +292,7 @@ public class DictionaryScanner {
 
         @Override
         @Nullable
-        public DictionaryFileSet buildFileSet(@NonNull Context context, @NonNull DocumentFile folder,
+        public DictionaryFileSet buildFileSet(@NonNull Context context, @NonNull DocumentFile[] folderFiles,
                                                @NonNull DocumentFile file, @NonNull Set<String> processedNames) {
             String ifoName = file.getName();
             if (ifoName == null) return null;
@@ -256,7 +303,6 @@ public class DictionaryScanner {
             files.add(file);  // .ifo file
 
             // Look for required companion files
-            DocumentFile[] folderFiles = folder.listFiles();
             boolean hasIdx = false;
             boolean hasDict = false;
 
@@ -326,7 +372,7 @@ public class DictionaryScanner {
 
         @Override
         @Nullable
-        public DictionaryFileSet buildFileSet(@NonNull Context context, @NonNull DocumentFile folder,
+        public DictionaryFileSet buildFileSet(@NonNull Context context, @NonNull DocumentFile[] folderFiles,
                                                @NonNull DocumentFile file, @NonNull Set<String> processedNames) {
             String name = file.getName();
             if (name == null) return null;
@@ -336,7 +382,6 @@ public class DictionaryScanner {
 
             List<DocumentFile> files = new ArrayList<>();
             files.add(file);
-            DocumentFile[] folderFiles = folder.listFiles();
             if (folderFiles != null) {
                 for (DocumentFile f : folderFiles) {
                     if (f == null || !f.isFile()) continue;
@@ -378,7 +423,7 @@ public class DictionaryScanner {
 
         @Override
         @Nullable
-        public DictionaryFileSet buildFileSet(@NonNull Context context, @NonNull DocumentFile folder,
+        public DictionaryFileSet buildFileSet(@NonNull Context context, @NonNull DocumentFile[] folderFiles,
                                                @NonNull DocumentFile file, @NonNull Set<String> processedNames) {
             // For .zip files, we can't easily inspect contents without extracting,
             // so we assume it's a valid StarDict archive if it's a .zip file
