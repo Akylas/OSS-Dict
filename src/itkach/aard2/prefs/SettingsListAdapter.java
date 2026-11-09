@@ -87,6 +87,7 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
     private static final long ID_AUTO_PASTE           = 602;
     private static final long ID_SHOW_KEYBOARD_LOOKUP = 603;
     private static final long ID_USE_VOLUME_FOR_NAV   = 604;
+    private static final long ID_RECENT_SHORTCUTS     = 605;
 
     private static final long ID_FAV_RANDOM           = 701;
     private static final long ID_DISABLE_RANDOM_LOOKUP = 702;
@@ -314,6 +315,11 @@ public class SettingsListAdapter extends RecyclerView.Adapter<SettingsListAdapte
                 new BoolPref() {
                     @Override public boolean get() { return AppPrefs.showKeyboarOnLookup(); }
                     @Override public void set(boolean v) { AppPrefs.setShowKeyboarOnLookup(v); }
+                }));
+        list.add(new SwitchItem(ID_RECENT_SHORTCUTS, R.string.setting_recent_shortcuts,
+                new BoolPref() {
+                    @Override public boolean get() { return AppPrefs.recentWordShortcuts(); }
+                    @Override public void set(boolean v) { AppPrefs.setRecentWordShortcuts(v); }
                 }));
         list.add(new SwitchItem(ID_USE_VOLUME_FOR_NAV, R.string.setting_use_volume_for_nav,
                 new BoolPref() {

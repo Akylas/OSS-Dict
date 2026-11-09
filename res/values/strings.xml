@@ -211,6 +211,7 @@
     <string name="setting_open_missing_browser">Open missing articles in browser</string>
     <string name="setting_use_volume_for_nav">Use volume buttons for navigation</string>
     <string name="setting_auto_paste">Auto-paste from clipboard</string>
+    <string name="setting_recent_shortcuts">Recent words as launcher shortcuts</string>
     <string name="find_hint">Find in page</string>
     <string name="find_next">Next</string>
     <string name="find_previous">Previous</string>

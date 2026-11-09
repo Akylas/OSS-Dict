@@ -31,6 +31,7 @@ import itkach.aard2.dictionaries.DictionaryFolderManager;
 import itkach.aard2.dictionary.DictionaryEntry;
 import itkach.aard2.lookup.LookupListener;
 import itkach.aard2.prefs.AppPrefs;
+import itkach.aard2.utils.RecentShortcuts;
 import itkach.aard2.utils.ThreadUtils;
 
 public class Application extends android.app.Application {
@@ -70,6 +71,13 @@ public class Application extends android.app.Application {
                     slobHelper.history.notifyDataSetChanged();
                     lookupAsync(AppPrefs.getLastQuery());
                 });
+            }
+        });
+
+        slobHelper.history.registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                RecentShortcuts.refreshAsync(Application.this);
             }
         });
 
