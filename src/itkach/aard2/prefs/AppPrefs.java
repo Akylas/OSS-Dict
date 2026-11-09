@@ -8,7 +8,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import itkach.aard2.Application;
 import itkach.aard2.SlobHelper;
+import itkach.aard2.utils.RecentShortcuts;
 import itkach.aard2.utils.ThreadUtils;
 
 public class AppPrefs extends Prefs {
@@ -20,6 +22,7 @@ public class AppPrefs extends Prefs {
     private static final String PREF_RANDOM_FAV_LOOKUP = "onlyFavDictsForRandomLookup";
     private static final String PREF_USE_VOLUME_FOR_NAV = "useVolumeForNav";
     private static final String PREF_AUTO_PASTE = "autoPaste";
+    private static final String PREF_RECENT_SHORTCUTS = "recentWordShortcuts";
     private static final String PREF_SHOW_KEYBOARD_LOOKUP = "showKeyboardLookup";
     private static final String PREF_AUTO_LOAD_DICT_FOLDER = "autoLoadDictFolder";
     private static final String PREF_AUTO_MOVE_TO_FOLDER = "autoMoveToFolder";
@@ -105,6 +108,15 @@ public class AppPrefs extends Prefs {
         getInstance().prefs.edit().putBoolean(PREF_AUTO_PASTE, autoPasteInLookup).apply();
     }
 
+
+    public static boolean recentWordShortcuts() {
+        return getInstance().prefs.getBoolean(PREF_RECENT_SHORTCUTS, false);
+    }
+
+    public static void setRecentWordShortcuts(boolean recentWordShortcuts) {
+        getInstance().prefs.edit().putBoolean(PREF_RECENT_SHORTCUTS, recentWordShortcuts).apply();
+        RecentShortcuts.refreshAsync(Application.get());
+    }
 
     public static boolean disableHistory() {
         return getInstance().prefs.getBoolean(PREF_DISABLE_HISTORY, false);

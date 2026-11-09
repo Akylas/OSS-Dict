@@ -1,9 +1,11 @@
 package itkach.aard2;
 
+import android.app.SearchManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -64,6 +66,8 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     private FloatingActionButton fab;
     private int oldPosition = -1;
     private boolean lookupFocusRequested;
+    @Nullable
+    private String lookupQuery;
     @Nullable
     private AlertDialog internetPermissionDialog;
 
@@ -198,14 +202,21 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     }
 
     /**
-     * Handles the launcher shortcut: shows the lookup tab and asks the lookup fragment to
-     * take focus. The fragment owns the search view, so the request is handed over as a
-     * flag it consumes while its options menu is (re)built.
+     * Handles the launcher shortcut and search intents: shows the lookup tab and asks the
+     * lookup fragment to take focus, optionally with a query to prefill. The fragment owns
+     * the search view, so the request is handed over as a flag and a query it consumes
+     * while its options menu is (re)built.
      */
     private void handleIntent(@Nullable Intent intent) {
-        if (intent == null || !ACTION_LOOKUP.equals(intent.getAction())) {
+        if (intent == null) {
             return;
         }
+        String action = intent.getAction();
+        if (!ACTION_LOOKUP.equals(action) && !Intent.ACTION_SEARCH.equals(action)) {
+            return;
+        }
+        String query = intent.getStringExtra(SearchManager.QUERY);
+        lookupQuery = query == null ? null : query.trim();
         lookupFocusRequested = true;
         viewPager.setCurrentItem(0);
         viewPager.post(this::invalidateOptionsMenu);
@@ -219,6 +230,17 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         boolean requested = lookupFocusRequested;
         lookupFocusRequested = false;
         return requested;
+    }
+
+    /**
+     * Returns the query a search intent asked to look up, clearing it so that it only
+     * applies once. Null when there is none.
+     */
+    @Nullable
+    public String consumeLookupQuery() {
+        String query = lookupQuery;
+        lookupQuery = null;
+        return TextUtils.isEmpty(query) ? null : query;
     }
 
     @Override
