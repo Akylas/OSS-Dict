@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.IOException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
@@ -20,7 +21,7 @@ import java.util.zip.Inflater;
  *
  * <p>Reads the zip central directory once, then reads single entries on
  * demand, so large media archives are never copied or extracted. Supports
- * stored and deflated entries; ZIP64 archives are not supported.</p>
+ * stored and deflated entries, and ZIP64 archives (more than 65535 entries).</p>
  *
  * <p>Pure Java (no Android) so it can be unit tested on the JVM.</p>
  */
@@ -29,6 +30,11 @@ public final class DslResourceZip {
     private static final int END_OF_CENTRAL_DIRECTORY = 0x06054b50;
     private static final int CENTRAL_DIRECTORY_ENTRY = 0x02014b50;
     private static final int LOCAL_FILE_HEADER = 0x04034b50;
+    private static final int ZIP64_END_RECORD = 0x06064b50;
+    private static final int ZIP64_LOCATOR = 0x07064b50;
+    private static final int ZIP64_LOCATOR_SIZE = 20;
+    private static final int ZIP64_END_RECORD_SIZE = 56;
+    private static final int ZIP64_EXTRA_FIELD = 0x0001;
     private static final int END_RECORD_SIZE = 22;
     private static final int MAX_COMMENT_SIZE = 0xFFFF;
     private static final int METHOD_STORED = 0;
@@ -67,12 +73,17 @@ public final class DslResourceZip {
         if (entries == null) entries = readCentralDirectory();
         ZipEntry entry = entries.get(normalize(name));
         if (entry == null) return null;
+        if (entry.compressedSize < 0 || entry.size < 0 || entry.localHeaderOffset < 0
+                || entry.compressedSize > Integer.MAX_VALUE || entry.size > Integer.MAX_VALUE) {
+            throw new IOException("Invalid entry size or offset: " + name);
+        }
 
         ByteBuffer header = readAt(entry.localHeaderOffset, 30);
         if (header.getInt(0) != LOCAL_FILE_HEADER) throw new IOException("Bad local header for " + name);
         int nameLength = header.getShort(26) & 0xFFFF;
         int extraLength = header.getShort(28) & 0xFFFF;
         long dataOffset = entry.localHeaderOffset + 30 + nameLength + extraLength;
+        if (dataOffset + entry.compressedSize > channel.size()) throw new IOException("Truncated entry " + name);
         byte[] compressed = readAt(dataOffset, (int) entry.compressedSize).array();
         if (entry.method == METHOD_STORED) return compressed;
 
@@ -108,18 +119,48 @@ public final class DslResourceZip {
             }
         }
         if (endRecord < 0) throw new IOException("Not a zip archive");
-        int entryCount = tail.getShort(endRecord + 10) & 0xFFFF;
+        long entryCount = tail.getShort(endRecord + 10) & 0xFFFF;
         long directorySize = tail.getInt(endRecord + 12) & 0xFFFFFFFFL;
         long directoryOffset = tail.getInt(endRecord + 16) & 0xFFFFFFFFL;
-        if (entryCount == 0xFFFF || directoryOffset == 0xFFFFFFFFL) {
-            throw new IOException("ZIP64 archives are not supported");
+        if (entryCount == 0xFFFF || directorySize == 0xFFFFFFFFL || directoryOffset == 0xFFFFFFFFL) {
+            long locatorOffset = fileSize - tailSize + endRecord - ZIP64_LOCATOR_SIZE;
+            if (locatorOffset >= 0) {
+                ByteBuffer locator = readAt(locatorOffset, ZIP64_LOCATOR_SIZE);
+                if (locator.getInt(0) == ZIP64_LOCATOR) {
+                    ByteBuffer record = readAt(locator.getLong(8), ZIP64_END_RECORD_SIZE);
+                    if (record.getInt(0) != ZIP64_END_RECORD) throw new IOException("Bad ZIP64 end record");
+                    entryCount = record.getLong(32);
+                    directorySize = record.getLong(40);
+                    directoryOffset = record.getLong(48);
+                }
+            }
+        }
+        if (entryCount < 0 || directoryOffset < 0 || directorySize < 0 || directorySize > Integer.MAX_VALUE
+                || directoryOffset + directorySize > fileSize) {
+            throw new IOException("Invalid central directory");
         }
 
         ByteBuffer directory = readAt(directoryOffset, (int) directorySize);
-        Map<String, ZipEntry> result = new HashMap<>(entryCount * 2);
+        try {
+            return parseCentralDirectory(directory, entryCount);
+        } catch (IndexOutOfBoundsException | BufferUnderflowException e) {
+            throw new IOException("Corrupt central directory", e);
+        }
+    }
+
+    /**
+     * The directory is walked to its end rather than counted: some writers
+     * store only the low 16 bits of the entry count of a large archive.
+     */
+    @NonNull
+    private static Map<String, ZipEntry> parseCentralDirectory(@NonNull ByteBuffer directory, long entryCount)
+            throws IOException {
+        Map<String, ZipEntry> result = new HashMap<>((int) Math.min(entryCount, 1_000_000L) * 2);
         int position = 0;
-        for (int count = 0; count < entryCount; count++) {
+        for (int count = 0; position + 46 <= directory.limit(); count++) {
             if (directory.getInt(position) != CENTRAL_DIRECTORY_ENTRY) {
+                // Past the declared entries this is trailing data (e.g. a digital signature).
+                if (count >= entryCount) break;
                 throw new IOException("Bad central directory entry " + count);
             }
             int flags = directory.getShort(position + 8) & 0xFFFF;
@@ -130,6 +171,32 @@ public final class DslResourceZip {
             int extraLength = directory.getShort(position + 30) & 0xFFFF;
             int commentLength = directory.getShort(position + 32) & 0xFFFF;
             long localHeaderOffset = directory.getInt(position + 42) & 0xFFFFFFFFL;
+            if (size == 0xFFFFFFFFL || compressedSize == 0xFFFFFFFFL || localHeaderOffset == 0xFFFFFFFFL) {
+                // Real values moved to the ZIP64 extra field, in this order, only for the
+                // 32-bit fields that overflowed.
+                int extra = position + 46 + nameLength;
+                int extraEnd = extra + extraLength;
+                while (extra + 4 <= extraEnd) {
+                    int fieldId = directory.getShort(extra) & 0xFFFF;
+                    int fieldLength = directory.getShort(extra + 2) & 0xFFFF;
+                    if (fieldId == ZIP64_EXTRA_FIELD) {
+                        int cursor = extra + 4;
+                        if (size == 0xFFFFFFFFL) {
+                            size = directory.getLong(cursor);
+                            cursor += 8;
+                        }
+                        if (compressedSize == 0xFFFFFFFFL) {
+                            compressedSize = directory.getLong(cursor);
+                            cursor += 8;
+                        }
+                        if (localHeaderOffset == 0xFFFFFFFFL) {
+                            localHeaderOffset = directory.getLong(cursor);
+                        }
+                        break;
+                    }
+                    extra += 4 + fieldLength;
+                }
+            }
             byte[] nameBytes = new byte[nameLength];
             directory.position(position + 46);
             directory.get(nameBytes);
