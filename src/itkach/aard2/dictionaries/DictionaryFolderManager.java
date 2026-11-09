@@ -13,6 +13,7 @@ import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,6 +35,8 @@ public class DictionaryFolderManager {
 
     private final Context context;
     private final SlobDescriptorList dictionaries;
+    // Paths of dictionaries whose id is already taken by another one (same file in two folders)
+    private final Set<String> duplicatePaths = Collections.synchronizedSet(new HashSet<>());
 
     private DictionaryFolderManager(@NonNull Context context, @NonNull SlobDescriptorList dictionaries) {
         this.context = context;
@@ -218,11 +221,14 @@ public class DictionaryFolderManager {
                 SlobDescriptor desc = dictionaries.get(i);
                 if (desc != null && desc.path != null
                         && isPathWithinFolder(desc.path, folderUriStr)
-                        && !scannedFileUris.contains(desc.path)) {
+                        && !scannedFileUris.contains(desc.path)
+                        && !fileStillExists(desc.path)) {
                     toRemove.add(desc);
                 }
             }
             if (!toRemove.isEmpty()) {
+                // A removed dictionary frees its id: rejected duplicates may now be added
+                duplicatePaths.clear();
                 dictionaries.beginUpdate();
                 try {
                     for (SlobDescriptor desc : toRemove) {
@@ -265,6 +271,10 @@ public class DictionaryFolderManager {
     private String addDictionary(@NonNull DictionaryScanner.DictionaryFileSet fileSet) {
         try {
             Uri uri = fileSet.mainFile.getUri();
+            // Already rejected as a duplicate: do not open and parse it again on every sync
+            if (duplicatePaths.contains(uri.toString())) {
+                return null;
+            }
 
             // Create descriptor and load dictionary
             SlobDescriptor descriptor = new SlobDescriptor();
@@ -281,6 +291,9 @@ public class DictionaryFolderManager {
                         + " (format: " + fileSet.format + ", id: " + descriptor.id + ")");
                 return descriptor.id;
             } else {
+                if (descriptor.id != null) {
+                    duplicatePaths.add(descriptor.path);
+                }
                 Log.d(TAG, "Dictionary already exists or failed to load: " + descriptor.id);
                 return null;
             }
@@ -337,6 +350,20 @@ public class DictionaryFolderManager {
             }
         }
         return changed;
+    }
+
+    /**
+     * Returns true if the file behind a descriptor path is still there. Guards against dropping
+     * dictionaries that a scan merely missed (folder listing failed, scan limits reached).
+     */
+    private boolean fileStillExists(@NonNull String path) {
+        Uri uri = Uri.parse(path);
+        if ("file".equals(uri.getScheme())) {
+            String filePath = uri.getPath();
+            return filePath != null && new File(filePath).exists();
+        }
+        DocumentFile document = DocumentFile.fromSingleUri(context, uri);
+        return document != null && document.exists();
     }
 
     /**
@@ -489,6 +516,7 @@ public class DictionaryFolderManager {
      */
     @WorkerThread
     private void clearAutoLoadedDictionaries() {
+        duplicatePaths.clear();
         // Get the library folder URI
         String folderUriStr = AppPrefs.getAutoLoadDictFolderUri();
         if (folderUriStr.isEmpty()) {
