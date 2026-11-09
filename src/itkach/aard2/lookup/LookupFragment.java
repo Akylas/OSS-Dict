@@ -122,6 +122,17 @@ public class LookupFragment extends BaseListFragment implements LookupListener, 
         FragmentActivity activity = requireActivity();
         boolean focusRequested = activity instanceof MainActivity
                 && ((MainActivity) activity).consumeLookupFocusRequest();
+        String requestedQuery = activity instanceof MainActivity
+                ? ((MainActivity) activity).consumeLookupQuery() : null;
+        if (requestedQuery != null) {
+            //Search intent: an explicit query wins over the clipboard and the last query
+            searchView.setQuery(requestedQuery, false);
+            //Not viewModel.lookup(): it skips a query equal to the last one, and a launcher
+            //shortcut relaunches the activity with that same query but no results
+            ((Application) activity.getApplication()).lookupAsync(requestedQuery);
+            focusSearch();
+            return;
+        }
         if (AppPrefs.autoPasteInLookup()) {
             CharSequence clipboard = ClipboardUtils.take(requireContext());
             if (clipboard != null && viewModel != null) {
