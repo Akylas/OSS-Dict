@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.IOException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
@@ -72,8 +73,9 @@ public final class DslResourceZip {
         if (entries == null) entries = readCentralDirectory();
         ZipEntry entry = entries.get(normalize(name));
         if (entry == null) return null;
-        if (entry.compressedSize > Integer.MAX_VALUE || entry.size > Integer.MAX_VALUE) {
-            throw new IOException("Entry too large: " + name);
+        if (entry.compressedSize < 0 || entry.size < 0 || entry.localHeaderOffset < 0
+                || entry.compressedSize > Integer.MAX_VALUE || entry.size > Integer.MAX_VALUE) {
+            throw new IOException("Invalid entry size or offset: " + name);
         }
 
         ByteBuffer header = readAt(entry.localHeaderOffset, 30);
@@ -81,6 +83,7 @@ public final class DslResourceZip {
         int nameLength = header.getShort(26) & 0xFFFF;
         int extraLength = header.getShort(28) & 0xFFFF;
         long dataOffset = entry.localHeaderOffset + 30 + nameLength + extraLength;
+        if (dataOffset + entry.compressedSize > channel.size()) throw new IOException("Truncated entry " + name);
         byte[] compressed = readAt(dataOffset, (int) entry.compressedSize).array();
         if (entry.method == METHOD_STORED) return compressed;
 
@@ -132,15 +135,32 @@ public final class DslResourceZip {
                 }
             }
         }
-        if (directorySize > Integer.MAX_VALUE) throw new IOException("Central directory too large");
+        if (entryCount < 0 || directoryOffset < 0 || directorySize < 0 || directorySize > Integer.MAX_VALUE
+                || directoryOffset + directorySize > fileSize) {
+            throw new IOException("Invalid central directory");
+        }
 
-        // The directory is walked to its end rather than counted: some writers
-        // store only the low 16 bits of the entry count of a large archive.
         ByteBuffer directory = readAt(directoryOffset, (int) directorySize);
+        try {
+            return parseCentralDirectory(directory, entryCount);
+        } catch (IndexOutOfBoundsException | BufferUnderflowException e) {
+            throw new IOException("Corrupt central directory", e);
+        }
+    }
+
+    /**
+     * The directory is walked to its end rather than counted: some writers
+     * store only the low 16 bits of the entry count of a large archive.
+     */
+    @NonNull
+    private static Map<String, ZipEntry> parseCentralDirectory(@NonNull ByteBuffer directory, long entryCount)
+            throws IOException {
         Map<String, ZipEntry> result = new HashMap<>((int) Math.min(entryCount, 1_000_000L) * 2);
         int position = 0;
         for (int count = 0; position + 46 <= directory.limit(); count++) {
             if (directory.getInt(position) != CENTRAL_DIRECTORY_ENTRY) {
+                // Past the declared entries this is trailing data (e.g. a digital signature).
+                if (count >= entryCount) break;
                 throw new IOException("Bad central directory entry " + count);
             }
             int flags = directory.getShort(position + 8) & 0xFFFF;
