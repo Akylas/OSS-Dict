@@ -42,6 +42,7 @@ public final class BlobDescriptorBackup {
     private static final String PROP_EXPORTED_AT = "exportedAt";
     private static final String PROP_BOOKMARKS = "bookmarks";
     private static final String PROP_HISTORY = "history";
+    private static final String PROP_FOLDERS = "folders";
 
     /** Parsed backup file content. */
     public static final class Content {
@@ -49,10 +50,14 @@ public final class BlobDescriptorBackup {
         public final List<BlobDescriptor> bookmarks;
         @NonNull
         public final List<BlobDescriptor> history;
+        @NonNull
+        public final List<String> folders;
 
-        public Content(@NonNull List<BlobDescriptor> bookmarks, @NonNull List<BlobDescriptor> history) {
+        public Content(@NonNull List<BlobDescriptor> bookmarks, @NonNull List<BlobDescriptor> history,
+                       @NonNull List<String> folders) {
             this.bookmarks = bookmarks;
             this.history = history;
+            this.folders = folders;
         }
     }
 
@@ -67,11 +72,13 @@ public final class BlobDescriptorBackup {
     public static void write(@NonNull OutputStream out, @NonNull ObjectMapper mapper,
                              @NonNull List<BlobDescriptor> bookmarks,
                              @NonNull List<BlobDescriptor> history,
+                             @NonNull List<String> folders,
                              long exportedAt) throws IOException {
         ObjectNode root = mapper.createObjectNode();
         root.put(PROP_FORMAT, FORMAT);
         root.put(PROP_VERSION, VERSION);
         root.put(PROP_EXPORTED_AT, exportedAt);
+        root.set(PROP_FOLDERS, mapper.valueToTree(folders));
         root.set(PROP_BOOKMARKS, toArray(mapper, bookmarks));
         root.set(PROP_HISTORY, toArray(mapper, history));
         mapper.writeValue(out, root);
@@ -100,7 +107,8 @@ public final class BlobDescriptorBackup {
         if (version < 1 || version > VERSION) {
             throw new IOException("Unsupported backup version: " + version);
         }
-        return new Content(toDescriptors(root.get(PROP_BOOKMARKS)), toDescriptors(root.get(PROP_HISTORY)));
+        return new Content(toDescriptors(root.get(PROP_BOOKMARKS)), toDescriptors(root.get(PROP_HISTORY)),
+                toTexts(root.get(PROP_FOLDERS)));
     }
 
     /**
@@ -138,24 +146,43 @@ public final class BlobDescriptorBackup {
         return accepted;
     }
 
+    // The entries selectNew() skips as already present gain the folders and note of the backup
+    @NonNull
+    public static List<BlobDescriptor> mergeAnnotations(@NonNull List<BlobDescriptor> existing,
+                                                        @NonNull List<BlobDescriptor> imported) {
+        List<BlobDescriptor> changed = new ArrayList<>();
+        for (BlobDescriptor candidate : imported) {
+            BlobDescriptor stored = candidate == null ? null : find(existing, candidate);
+            if (stored != null && BookmarkFolders.mergeInto(stored, candidate) && !changed.contains(stored)) {
+                changed.add(stored);
+            }
+        }
+        return changed;
+    }
+
+    private static boolean contains(@NonNull List<BlobDescriptor> list, @NonNull BlobDescriptor candidate) {
+        return find(list, candidate) != null;
+    }
+
     /**
      * Same rule as {@code BlobDescriptorList.contains}: an exact descriptor match, or the same
      * key in the same dictionary (the descriptor was recreated after the dictionary changed).
      */
-    private static boolean contains(@NonNull List<BlobDescriptor> list, @NonNull BlobDescriptor candidate) {
+    @Nullable
+    private static BlobDescriptor find(@NonNull List<BlobDescriptor> list, @NonNull BlobDescriptor candidate) {
         for (BlobDescriptor descriptor : list) {
             if (descriptor == null) {
                 continue;
             }
             if (descriptor.equals(candidate)) {
-                return true;
+                return descriptor;
             }
             if (Objects.equals(descriptor.key, candidate.key)
                     && Objects.equals(descriptor.slobUri, candidate.slobUri)) {
-                return true;
+                return descriptor;
             }
         }
-        return false;
+        return null;
     }
 
     @NonNull
@@ -174,6 +201,8 @@ public final class BlobDescriptorBackup {
             node.put("blobId", descriptor.blobId);
             node.put("key", descriptor.key);
             node.put("fragment", descriptor.fragment);
+            node.put("note", descriptor.note);
+            node.set("folders", mapper.valueToTree(descriptor.folders));
             array.add(node);
         }
         return array;
@@ -198,10 +227,26 @@ public final class BlobDescriptorBackup {
             descriptor.blobId = getText(node, "blobId");
             descriptor.key = getText(node, "key");
             descriptor.fragment = getText(node, "fragment");
+            descriptor.note = getText(node, "note");
+            descriptor.folders = toTexts(node.get("folders"));
             if (isEmpty(descriptor.slobId) || isEmpty(descriptor.key)) {
                 continue;
             }
             result.add(descriptor);
+        }
+        return result;
+    }
+
+    @NonNull
+    private static List<String> toTexts(@Nullable JsonNode array) {
+        List<String> result = new ArrayList<>();
+        if (array != null && array.isArray()) {
+            for (JsonNode node : array) {
+                String value = node.asText(null);
+                if (!isEmpty(value) && !result.contains(value)) {
+                    result.add(value);
+                }
+            }
         }
         return result;
     }

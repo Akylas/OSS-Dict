@@ -37,6 +37,7 @@ import itkach.aard2.dictionary.DictionaryEntry;
 import itkach.aard2.dictionary.SlobDictionary;
 import itkach.aard2.lookup.LookupResult;
 import itkach.aard2.prefs.AppPrefs;
+import itkach.aard2.prefs.BookmarkFolderPrefs;
 import itkach.aard2.slob.SlobServer;
 import itkach.slob.Slob;
 
@@ -235,15 +236,17 @@ public final class SlobHelper {
     @MainThread
     @NonNull
     public BlobDescriptorBackup.Content snapshotForBackup() {
-        return new BlobDescriptorBackup.Content(
-                new ArrayList<>(bookmarks.getList()), new ArrayList<>(history.getList()));
+        Set<String> folders = BookmarkFolderPrefs.getNames();
+        folders.addAll(bookmarks.getFolderCounts().keySet());
+        return new BlobDescriptorBackup.Content(new ArrayList<>(bookmarks.getList()),
+                new ArrayList<>(history.getList()), new ArrayList<>(folders));
     }
 
     /** Writes a snapshot taken by {@link #snapshotForBackup()} as a backup document. */
     @WorkerThread
     public void writeBackup(@NonNull OutputStream out, @NonNull BlobDescriptorBackup.Content content)
             throws IOException {
-        BlobDescriptorBackup.write(out, mapper, content.bookmarks, content.history,
+        BlobDescriptorBackup.write(out, mapper, content.bookmarks, content.history, content.folders,
                 System.currentTimeMillis());
     }
 

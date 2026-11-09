@@ -6,4 +6,8 @@
     <dimen name="app_minimumsize_w">632.0dip</dimen>
     <dimen name="app_minimumsize_h">598.0dip</dimen>
 
+    <!-- Title room in a popup menu on a phone: 320dp less row padding and radio button, and a margin -->
+    <dimen name="folder_menu_title_max_width">216dp</dimen>
+    <dimen name="folder_search_inset">16dp</dimen>
+
 </resources>

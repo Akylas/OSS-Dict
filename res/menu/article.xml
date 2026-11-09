@@ -15,6 +15,12 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/action_bookmark_folders"
+        android:icon="@drawable/ic_edit_note"
+        android:title="@string/action_bookmark_folders"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/action_find_in_page"
         android:title="@string/action_find_in_page"
         app:showAsAction="never" />

@@ -32,6 +32,8 @@
     java.lang.String blobId;
     java.lang.String key;
     java.lang.String fragment;
+    java.util.List folders;
+    java.lang.String note;
 }
 
 -keepclassmembers class itkach.aard2.descriptor.SlobDescriptor {

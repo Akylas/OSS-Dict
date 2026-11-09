@@ -1,6 +1,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/blob_descriptor_edit_folders"
+        android:icon="@drawable/ic_edit_note"
+        android:title="@string/action_bookmark_folders" />
+
+    <item
         android:id="@+id/blob_descriptor_select_all"
         android:icon="@drawable/ic_select_all"
         android:title="@android:string/selectAll" />

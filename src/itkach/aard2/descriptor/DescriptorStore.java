@@ -75,6 +75,13 @@ public class DescriptorStore<T extends BaseDescriptor> {
                 d.blobId = getText(root, "blobId");
                 d.key = getText(root, "key");
                 d.fragment = getText(root, "fragment");
+                d.note = getText(root, "note");
+                for (JsonNode folder : root.path("folders")) {
+                    String name = folder.asText(null);
+                    if (name != null && !name.isEmpty()) {
+                        d.folders.add(name);
+                    }
+                }
                 if (d.id == null || d.id.isEmpty()) {
                     d.id = f.getName();
                 }
@@ -174,6 +181,8 @@ public class DescriptorStore<T extends BaseDescriptor> {
                 root.put("blobId", d.blobId);
                 root.put("key", d.key);
                 root.put("fragment", d.fragment);
+                root.put("note", d.note);
+                root.set("folders", mapper.valueToTree(d.folders));
                 mapper.writeValue(out, root);
             } else if (item instanceof SlobDescriptor) {
                 SlobDescriptor d = (SlobDescriptor) item;

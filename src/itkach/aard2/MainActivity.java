@@ -411,6 +411,11 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             return "bookmarks";
         }
 
+        @Override
+        boolean supportsFolders() {
+            return true;
+        }
+
 
         @Override
         public void onResume() {
