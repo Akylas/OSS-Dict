@@ -189,4 +189,24 @@
     <string name="msg_backup_imported">%1$d bladwijzers en %2$d geschiedenisartikels geïmporteerd</string>
     <string name="msg_backup_export_failed">Back-up maken mislukt</string>
     <string name="msg_backup_import_failed">Geen geldig back-upbestand</string>
+    <string name="action_bookmark_folders">Mappen en notities</string>
+    <string name="folders_title">Mappen</string>
+    <string name="folders_new">Nieuwe map</string>
+    <string name="folders_name_hint">Mapnaam</string>
+    <string name="folders_none_yet">Nog geen mappen</string>
+    <string name="bookmark_note_hint">Notitie</string>
+    <string name="bookmark_add_note_hint">Notities of mappen toevoegen</string>
+    <string name="bookmark_folders_label">Mappen: %1$s</string>
+    <string name="bookmark_confirm_remove">Bladwijzer verwijderen? Notities en mappen zullen verloren gaan.</string>
+    <string name="folders_all">Alle</string>
+    <string name="folders_unfiled">Geen map</string>
+    <string name="folders_rename_title">Map hernoemen</string>
+    <string name="folders_exists">Er bestaat al een map met deze naam</string>
+    <string name="folders_confirm_delete">Map \"%1$s\" verwijderen? Bladwijzers blijven bewaard.</string>
+    <string name="folders_empty_folder">Geen bladwijzers in deze map</string>
+    <string name="folders_list">Mappenlijst</string>
+    <string name="folders_manage">Mappen beheren</string>
+    <string name="folders_search">Mappen zoeken</string>
+    <string name="folders_search_none">Geen map met deze naam</string>
+    <string name="setting_recent_shortcuts">Recente woorden als snelkoppelingen op het startscherm</string>
 </resources>

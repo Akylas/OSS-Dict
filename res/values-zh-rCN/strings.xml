@@ -178,4 +178,24 @@
     <string name="msg_backup_imported">导入了 %1$d 个书签、%2$d 个历史条目</string>
     <string name="msg_backup_export_failed">写入备份文件失败</string>
     <string name="msg_backup_import_failed">不是有效的备份文件</string>
+    <string name="setting_recent_shortcuts">把最近单词作为启动器快捷方式</string>
+    <string name="action_bookmark_folders">文件夹和附注</string>
+    <string name="folders_title">文件夹</string>
+    <string name="folders_new">新建文件夹</string>
+    <string name="folders_name_hint">文件夹名</string>
+    <string name="folders_none_yet">还没有文件夹</string>
+    <string name="bookmark_note_hint">附注</string>
+    <string name="bookmark_add_note_hint">添加附注或文件夹</string>
+    <string name="bookmark_folders_label">文件夹：%1$s</string>
+    <string name="bookmark_confirm_remove">删除此书签？其附注和文件夹将丢失。</string>
+    <string name="folders_all">所有</string>
+    <string name="folders_unfiled">无文件夹</string>
+    <string name="folders_rename_title">重命名文件夹</string>
+    <string name="folders_exists">已存在同名文件夹</string>
+    <string name="folders_confirm_delete">删除文件夹“%1$s”？ 将保留其中的书签。</string>
+    <string name="folders_empty_folder">此文件夹中无书签</string>
+    <string name="folders_list">文件夹列表</string>
+    <string name="folders_manage">管理文件夹</string>
+    <string name="folders_search">搜索文件夹</string>
+    <string name="folders_search_none">没有这个名称的文件夹</string>
 </resources>
