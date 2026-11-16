@@ -72,7 +72,7 @@
     <string name="action_reload_directory">Recharger</string>
     <string name="msg_dictionary_already_open">Déjà ouvert</string>
     <string name="msg_dictionary_added">Dictionnaire de %1$s ajouté</string>
-    <string name="setting_fav_random_search">En recherche aléatoire, ouvrir uniquement les dictionnaires favorisés</string>
+    <string name="setting_fav_random_search">En recherche aléatoire, ouvrir uniquement les dictionnaires favoris</string>
     <string name="article_collection_invalid_link">Lien périmé</string>
     <string name="setting_ui_theme">Interface utilisateur</string>
     <string name="setting_ui_theme_light">Clair</string>
@@ -100,4 +100,24 @@
     <string name="setting_disable_bookmarks">Désactiver les signets</string>
     <string name="setting_disable_random_lookup">Désactiver la recherche aléatoire</string>
     <string name="setting_remote_content_cache_first">Ne charger le contenu distant que s\'il n\'est pas déjà mis en cache</string>
+    <string name="setting_recent_shortcuts">Utiliser les mots récents comme raccourcis de lancement</string>
+    <string name="msg_loading_dictionary">Chargement du dictionnaire…</string>
+    <string name="folders_search_none">Pas de dossier sous ce nom</string>
+    <string name="folders_search">Recherche de dossier</string>
+    <string name="folders_name_hint">Nom de Dossier</string>
+    <string name="setting_disable_bottom_nav_labels">Cacher les noms des boutons de navigation</string>
+    <string name="shortcut_lookup_short_label">Recherche</string>
+    <string name="shortcut_lookup_long_label">Rechercher un mot</string>
+    <string name="folders_none_yet">Pas de dossier pour l\'instant</string>
+    <string name="action_export">Exporter</string>
+    <string name="action_import">Importer</string>
+    <string name="msg_backup_exported">%1$d marques pages, %2$d entrées d\'historique exportés</string>
+    <string name="msg_backup_imported">%1$d marques pages, %2$d entrées d\'historique importés</string>
+    <string name="msg_backup_export_failed">Échec d\'écriture du fichier de sauvegarde</string>
+    <string name="settings_section_lookup">Recherche</string>
+    <string name="settings_section_features">Fonctionnalités</string>
+    <string name="settings_section_backup">Sauvegardes</string>
+    <string name="setting_backup">Marques pages et Historique</string>
+    <string name="setting_backup_subtitle">Sauvegarde dans un fichier pour transfert sur un autre appareil. L\'importation conserve ce que vous avez déjà.</string>
+    <string name="setting_about_source">Code Source</string>
 </resources>
