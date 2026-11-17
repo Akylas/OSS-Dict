@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">OSS Dict</string>
     <string name="subtitle_lookup">Búsqueda</string>
     <string name="subtitle_bookmark">Marcadores</string>
@@ -16,6 +16,7 @@
     <string name="action_lookup">Buscar</string>
     <plurals name="dict_item_count">
         <item quantity="one">%,d elemento</item>
+        <item quantity="many">%,d elementos</item>
         <item quantity="other">%,d elementos</item>
     </plurals>
     <string name="action_zoom_out">Reducir</string>
@@ -48,10 +49,12 @@
     <string name="delete">Borrar</string>
     <plurals name="confirm_delete_bookmark_count">
         <item quantity="one">%,d marcador</item>
+        <item quantity="many">%,d marcadores</item>
         <item quantity="other">%,d marcadores</item>
     </plurals>
     <plurals name="confirm_delete_history_count">
         <item quantity="one">%,d registro de historial</item>
+        <item quantity="many">%,d registros de historial</item>
         <item quantity="other">%,d registros de historial</item>
     </plurals>
     <string name="blob_descriptor_confirm_delete">Borrars %1$s?</string>
@@ -74,7 +77,7 @@
     <string name="setting_ui_theme">Estilo de Interfaz de usuario Interface Style</string>
     <string name="setting_ui_theme_light">Claro</string>
     <string name="setting_ui_theme_dark">Oscuro</string>
-    <string name="action_load_remote_content">Load Remote Content</string>
+    <string name="action_load_remote_content">Cargar contenido remoto</string>
     <string name="auto_style_title">Auto</string>
     <string name="action_fullscreen">Pantalla completa</string>
     <string name="setting_use_volume_for_nav">Usar botones de volumen para navegación</string>
@@ -83,4 +86,133 @@
     <string name="find_previous">Anterior"</string>
     <string name="setting_ui_theme_system">Sistema</string>
     <string name="setting_auto_paste">Pegar automáticamente desde el portapapeles</string>
+    <string name="shortcut_lookup_short_label">Búsqueda</string>
+    <string name="shortcut_lookup_long_label">Buscar una palabra</string>
+    <string name="formats_supported_header">Formatos compatibles: .slob, .mdx, .zip (Stardict, GoldenDict), .dsl, .dsl.gz, dsl.dz (Lingvo DSL)</string>
+    <string name="main_empty_dictionaries_details"><![CDATA[
+        <b>Ningún diccionario esta abierto</b><br/><br/>
+        <small>
+        OSS-Dict es compatible con los siguientes formatos: <b>.slob</b> (Aard/slob), <b>.mdx</b> (MDict), <b>StarDict</b> como archivadores <b>.zip</b> que contengan .ifo/.dict/.idx, <b>.dsl</b>/<b>.dsl.gz</b>/<b>.dsl.dz</b> (Lingvo DSL).<br/><br/>
+        Puedes descargar diccionarios desde la wiki del proyecto: <a href="https://github.com/itkach/slob/wiki/Dictionaries">Diccionarios (repositorio slob)</a> o desde los lanzamientos de OSS-Dict y los repositorios de la comunidad.
+        </small>
+        ]]></string>
+    <string name="main_empty_dictionaries_title">Ningún diccionario esta abierto</string>
+    <string name="main_empty_dictionaries_subtitle">OSS-Dict es compatible con los siguientes formatos</string>
+    <string name="main_empty_dictionaries_download_text" tools:ignore="UnusedResources">Puedes encontrar links para obtener diccionarios</string>
+    <string name="here" tools:ignore="UnusedResources">aquí</string>
+    <string name="action_get_dictionaries">Obtener diccionarios</string>
+    <string name="action_open_in_browser">Abrir en el navegador</string>
+    <string name="action_reload">Recargar</string>
+    <string name="action_download_and_add">Descargar y añadir</string>
+    <string name="dictionary_download_title">Añadir diccionario?</string>
+    <string name="dictionary_download_message_folder">%1$s sera descargado en su directorio de diccionarios y añadido a la aplicación.</string>
+    <string name="dictionary_download_message_app_storage">%1$s sera descargado en el almacenamiento de la aplicación y añadido. Se borrara cuando usted remueva el diccionario.</string>
+    <string name="dictionary_download_size">Tamaño: %1$s</string>
+    <string name="dictionary_download_unsupported_title">Archivo no compatible</string>
+    <string name="dictionary_download_unsupported_message">%1$s no es un formato que OSS-Dict pueda añadir directamente. Puedes descargarlo con tu navegador en su lugar.</string>
+    <string name="msg_dictionary_download_started">Descargando %1$s…</string>
+    <string name="msg_dictionary_download_failed">Error al descargar %1$s</string>
+    <string name="msg_dictionary_extract_failed">Error al extraer %1$s</string>
+    <string name="msg_dictionary_archive_empty">No se ha encontrado ningún diccionario en %1$s</string>
+    <string name="dictionaries_rename_title">Renombrar diccionario</string>
+    <string name="dictionaries_rename_hint">Nombre mostrado</string>
+    <string name="dictionaries_original_label">Original: %1$s</string>
+    <string name="action_rename">Renombrar</string>
+    <string name="action_save">Guardar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_reset">Reiniciar</string>
+    <string name="action_select_dictionary_folder">Seleccionar directorio de diccionarios</string>
+    <string name="msg_no_activity_to_select_folder">No hay aplicación disponible para seleccionar el directorio</string>
+    <string name="setting_auto_load_folder">Directorio de librería</string>
+    <string name="setting_auto_load_folder_subtitle">Automáticamente cargar diccionarios de un directorio seleccionado</string>
+    <string name="setting_auto_move_to_folder">Mover automáticamente al directorio</string>
+    <string name="setting_auto_move_to_folder_subtitle_disabled">Selecciona un directorio de librería primero</string>
+    <string name="action_clear">Limpiar</string>
+    <string name="msg_folder_selected">Directorio seleccionado exitosamente</string>
+    <string name="msg_failed_to_select_folder">Error al seleccionar directorio</string>
+    <string name="msg_folder_cleared">Directorio de librería limpiado</string>
+    <string name="msg_move_to_auto_load_folder_hint">Tip: Mueva sus diccionarios a la carpeta de librería para que se administren automáticamente</string>
+    <string name="dialog_clear_auto_load_folder_title">Limpiar directorio de librería?</string>
+    <string name="settings_section_lookup">Buscar</string>
+    <string name="settings_section_features">Características</string>
+    <string name="settings_section_backup">Respaldo</string>
+    <string name="setting_backup">Marcadores e historial</string>
+    <string name="setting_backup_subtitle">Guardelas a un archivo para poder moverlas a otro dispositivo. La importación mantiene lo que usted tiene.</string>
+    <string name="action_export">Exportar</string>
+    <string name="action_import">Importar</string>
+    <string name="msg_backup_exported">Exportados %1$d marcadores, %2$d elementos del historial</string>
+    <string name="msg_backup_imported">Importados %1$d marcadores, %2$d elementos del historial</string>
+    <string name="msg_backup_export_failed">Error al escribir el archivo de respaldo</string>
+    <string name="msg_backup_import_failed">No es un archivo de respaldo valido</string>
+    <string name="setting_about_source">Código fuente</string>
+    <string name="setting_about_sponsor">Patrocinar con GitHub Sponsors</string>
+    <string name="action_bookmark_folders">Directorios y nota</string>
+    <string name="folders_title">Directorios</string>
+    <string name="folders_new">Nuevo directorio</string>
+    <string name="folders_name_hint">Nombre del directorio</string>
+    <string name="folders_none_yet">No hay directorios aun</string>
+    <string name="bookmark_note_hint">Nota</string>
+    <string name="bookmark_add_note_hint">Añade una nota o directorios</string>
+    <string name="bookmark_folders_label">Directorios: %1$s</string>
+    <string name="bookmark_confirm_remove">Eliminar este marcador? Su nota y directorios serán eliminados.</string>
+    <string name="folders_all">Todo</string>
+    <string name="folders_unfiled">Sin directorio</string>
+    <string name="folders_rename_title">Renombrar directorio</string>
+    <string name="folders_exists">Un directorio con este nombre ya existe</string>
+    <string name="folders_confirm_delete">Eliminar el directorio \"%1$s\"? Los marcadores que existan en el se guardan.</string>
+    <string name="folders_empty_folder">No hay marcadores en este directorio</string>
+    <string name="folders_list">Lista de directorios</string>
+    <string name="folders_manage">Administrar directorios</string>
+    <string name="folders_search">Buscar directorios</string>
+    <string name="folders_search_none">No existe directorio con ese nombre</string>
+    <string name="dialog_clear_auto_load_folder_message">Todos los diccionarios cargados desde este directorio serán removidos de la aplicación. Esta acción no es reversible.</string>
+    <string name="notification_channel_dictionary_scan">Escaneo de diccionarios</string>
+    <string name="notification_channel_dictionary_scan_desc">Mostrar el progreso cuando se escanea el directorio de diccionarios</string>
+    <string name="notification_scanning_dictionaries">Escaneando diccionarios</string>
+    <string name="notification_scanning_starting">Iniciando escaneo…</string>
+    <string name="notification_loading_dictionary">Cargando %1$s (%2$d/%3$d)</string>
+    <string name="notification_scan_completed_both">Añadido(s) %1$d, removido(s) %2$d diccionarios</string>
+    <string name="notification_scan_completed_no_changes">Ningún cambio detectado</string>
+    <plurals name="notification_scan_completed_added">
+        <item quantity="one">Añadido %d diccionario</item>
+        <item quantity="many">Añadidos %d diccionarios</item>
+        <item quantity="other">Añadidos %d diccionarios</item>
+    </plurals>
+    <plurals name="notification_scan_completed_removed">
+        <item quantity="one">Removido %d diccionario</item>
+        <item quantity="many">Removidos %d diccionarios</item>
+        <item quantity="other">Removidos %d diccionarios</item>
+    </plurals>
+    <string name="msg_loading_dictionary">Cargando diccionario…</string>
+    <string name="setting_show_keyboard_lookup">Mostrar el teclado automáticamente al buscar</string>
+    <string name="setting_open_missing_browser">Abrir artículos no encontrados en el navegador</string>
+    <string name="setting_recent_shortcuts">Palabras recientes como atajos del lanzador</string>
+    <string name="setting_ui_theme_auto">Automático</string>
+    <string name="action_yes">Sí</string>
+    <string name="action_no">No</string>
+    <string name="setting_enable_force_dark_web_view">Activar el modo oscuro forzado en WebView cuando se usa el tema oscuro</string>
+    <string name="setting_disable_javascript_title">Desactivar JavaScript</string>
+    <string name="setting_disable_javascript_subtitle">Al desactivar JavaScript puede que ciertas funciones, como el uso de temas personalizados y la carga de contenido remoto, dejen de funcionar.</string>
+    <string name="setting_disable_swipe_navigation_title">Desactivar gesto horizontal para cambiar de articulo</string>
+    <string name="setting_disable_swipe_navigation_subtitle">Mantiene el gesto horizontal para navegar contenido ancho. Se puede cambiar de articulo usando las pestañas.</string>
+    <string name="setting_allow_fullscreen_title">Permitir pantalla completa</string>
+    <string name="setting_allow_fullscreen_subtitle">Mostrar los botones de pantalla completa en los artículos. Cuando se desactiva, los artículos siempre mantendrán las barras de estado y navegación.</string>
+    <string name="specified_number_of_items_selected">%d seleccionado</string>
+    <string name="action_open_random_article">Artículo al azar</string>
+    <string name="setting_disable_history">Desactivar historial</string>
+    <string name="setting_disable_bookmarks">Desactivar marcadores</string>
+    <string name="setting_disable_random_lookup">Desactivar búsqueda al azar</string>
+    <string name="setting_disable_bottom_nav_labels">Desactivar las etiquetas de la barra de navegación inferior</string>
+    <string name="setting_remote_content_cache_first">Solo cargar contenido remoto si no se encuentra en la caché</string>
+    <string name="setting_sort_lookup_by_rank">Ordenar resultados con mas coincidencias primero</string>
+    <string name="permission_internet_required_title">Se necesita permiso de internet</string>
+    <string name="permission_internet_required_message">Esta aplicación necesita permiso de internet para funcionar correctamente. Incluso aunque no se usa directamente, se necesita el permiso para poder realizar comunicación socket interna. Por favor permita el permiso de internet en los ajustes de su dispositivo.</string>
+    <string name="article_internet_permission_required">No se puede mostrar este artículo: se necesita permiso de internet para poder realizar comunicación interna. Por favor permita el acceso a internet en los ajustes de su dispositivo.</string>
+    <string name="msg_permission_denied_notifications">El permiso para enviar notificaciones fue rechazado. La aplicación no notificará nuevos diccionarios.</string>
+    <string name="rationale_notifications_needed">La aplicación necesita permiso para enviar notificaciones y así poder notificarlo cuando el escaneo automatico encuentra nuevos diccionarios.</string>
+    <string name="action_allow">Permitir</string>
+    <string name="settings_section_appearance">Apariencia</string>
+    <string name="settings_section_library">Libreria</string>
+    <string name="settings_section_content">Contenido</string>
+    <string name="settings_section_article_view">Vista de articulo</string>
 </resources>
